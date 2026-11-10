@@ -55,3 +55,23 @@ $('load-basic').onclick=async()=>{
   if($('sheet').disabled){button.disabled=false;button.textContent='기본부문 다시 불러오기';}
  }
 };
+// 화면 전환 함수
+function showPage(pageId) {
+  // 모든 페이지 구역 숨기기
+  const pages = document.querySelectorAll('.page-view');
+  pages.forEach(page => {
+    page.classList.remove('active');
+  });
+
+  // 클릭한 대상 페이지 나타내기
+  if (pageId === 'main') {
+    document.getElementById('page-main').classList.add('active');
+  } else if (pageId === 'explorer') {
+    document.getElementById('page-explorer').classList.add('active');
+  } else if (pageId === 'simulator') {
+    document.getElementById('page-simulator').classList.add('active');
+  }
+
+  // 화면 맨 위로 스크롤 이동
+  window.scrollTo(0, 0);
+}
