@@ -1,4 +1,6 @@
-// app.js - UI 제어 및 Worker 통신
+// ==========================================
+// 0. 페이지 전환 제어 함수 (추가된 기능)
+// ==========================================
 function showPage(pageId) {
   document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
   const target = document.getElementById(`page-${pageId}`);
@@ -6,112 +8,201 @@ function showPage(pageId) {
   window.scrollTo(0, 0);
 }
 
-let globalData = null;
+// ==========================================
+// 1. 교수님 원본 app.js 로직 (100% 동일)
+// ==========================================
+const statusEl = document.getElementById("status");
+const loadBasicBtn = document.getElementById("load-basic");
+const explorerControls = document.getElementById("explorer-controls");
+const sheetSelect = document.getElementById("sheet-select");
+const rowSelect = document.getElementById("row-select");
+const searchInput = document.getElementById("search-input");
+const explorerResult = document.getElementById("explorer-result");
+const simulationInputs = document.getElementById("simulation-inputs");
+const simulationSummary = document.getElementById("simulation-summary");
+const simulationTop15 = document.getElementById("simulation-top15");
+
 let worker = null;
+let modelData = null;
+let activeRows = [];
 
-document.addEventListener('DOMContentLoaded', () => {
-  const statusEl = document.getElementById('status');
-  const loadBtn = document.getElementById('load-basic');
-
-  if (loadBtn) {
-    loadBtn.addEventListener('click', () => {
-      if (statusEl) statusEl.textContent = "파이썬 엔진(Pyodide) 및 엑셀 로딩을 시작합니다...";
-      
-      if (!worker) {
-        worker = new Worker('worker.js');
-        
-        worker.onmessage = function (e) {
-          const { type, message, data, error } = e.data;
-
-          if (type === 'status' && statusEl) {
-            statusEl.textContent = message;
-          } else if (type === 'loaded') {
-            if (statusEl) statusEl.textContent = "✅ 자료 불러오기 완료! 원자료 탐색 및 시뮬레이션을 이용하세요.";
-            loadBtn.disabled = true;
-            globalData = data;
-            initAppFeatures(globalData);
-          } else if (type === 'error') {
-            if (statusEl) statusEl.textContent = "❌ 로딩 실패: " + error;
-            alert("자료 로딩 중 오류가 발생했습니다: " + error);
-          }
-        };
-
-        worker.onerror = function (err) {
-          if (statusEl) statusEl.textContent = "❌ worker.js 스크립트 실행 오류 발생";
-        };
-      }
-
-      worker.postMessage({ action: 'load' });
-    });
+function setStatus(message, isError = false) {
+  if (statusEl) {
+    statusEl.textContent = message;
+    statusEl.style.color = isError ? "#b91c1c" : "";
   }
+}
+
+function initWorker() {
+  worker = new Worker("worker.js");
+  worker.onmessage = (e) => {
+    const msg = e.data;
+    if (msg.type === "status") {
+      setStatus(msg.message);
+    } else if (msg.type === "ready") {
+      modelData = msg.payload;
+      setStatus("자료 준비 완료: " + modelData.metadata.basic_title);
+      loadBasicBtn.disabled = true;
+      enableExplorer();
+      enableSimulation();
+    } else if (msg.type === "simulationResult") {
+      renderSimulationResult(msg.payload);
+    } else if (msg.type === "error") {
+      setStatus(msg.message, true);
+    }
+  };
+}
+
+loadBasicBtn.addEventListener("click", () => {
+  if (!worker) {
+    initWorker();
+  }
+  loadBasicBtn.disabled = true;
+  setStatus("Pyodide 및 엑셀 로딩 시작...");
+  worker.postMessage({ type: "init" });
 });
 
-function initAppFeatures(data) {
-  const sheetSelect = document.getElementById('sheet-select');
-  const rowSelect = document.getElementById('row-select');
-  const searchInput = document.getElementById('search-input');
-
-  if (!sheetSelect || !data.sheets) return;
-
-  sheetSelect.innerHTML = '<option value="">-- 시트 선택 --</option>';
-  Object.keys(data.sheets).forEach(sheetName => {
-    const opt = document.createElement('option');
-    opt.value = sheetName;
-    opt.textContent = sheetName;
+function enableExplorer() {
+  sheetSelect.disabled = false;
+  sheetSelect.innerHTML = '<option value="">-- 시트를 선택하세요 --</option>';
+  modelData.sheets.forEach((sheet, idx) => {
+    const opt = document.createElement("option");
+    opt.value = idx;
+    opt.textContent = `${sheet.name} (${sheet.rows_count}x${sheet.cols_count})`;
     sheetSelect.appendChild(opt);
   });
-  sheetSelect.disabled = false;
+}
 
-  sheetSelect.addEventListener('change', (e) => {
-    const sheetName = e.target.value;
-    rowSelect.innerHTML = '<option value="">-- 행 선택 --</option>';
-    if (!sheetName) {
-      rowSelect.disabled = true;
-      searchInput.disabled = true;
+sheetSelect.addEventListener("change", () => {
+  const sheetIdx = sheetSelect.value;
+  rowSelect.innerHTML = '<option value="">-- 행을 선택하세요 --</option>';
+  explorerResult.innerHTML = "";
+  if (sheetIdx === "") {
+    rowSelect.disabled = true;
+    searchInput.disabled = true;
+    return;
+  }
+  const sheet = modelData.sheets[sheetIdx];
+  rowSelect.disabled = false;
+  sheet.rows.forEach((row, idx) => {
+    const opt = document.createElement("option");
+    opt.value = idx;
+    opt.textContent = `[${row.code}] ${row.name}`;
+    rowSelect.appendChild(opt);
+  });
+});
+
+rowSelect.addEventListener("change", () => {
+  if (rowSelect.value === "") {
+    searchInput.disabled = true;
+    explorerResult.innerHTML = "";
+    return;
+  }
+  searchInput.disabled = false;
+  renderExplorerTable();
+});
+
+searchInput.addEventListener("input", () => {
+  renderExplorerTable();
+});
+
+function renderExplorerTable() {
+  const sheetIdx = sheetSelect.value;
+  const rowIdx = rowSelect.value;
+  if (sheetIdx === "" || rowIdx === "") return;
+
+  const sheet = modelData.sheets[sheetIdx];
+  const row = sheet.rows[rowIdx];
+  const query = searchInput.value.trim().toLowerCase();
+
+  let html = `<p><strong>${sheet.name}</strong> - [${row.code}] ${row.name}</p>`;
+  html += `<table><thead><tr><th>열 코드</th><th>열 이름</th><th>값</th></tr></thead><tbody>`;
+
+  sheet.columns.forEach((col, idx) => {
+    const val = row.values[idx];
+    const match = col.code.toLowerCase().includes(query) || col.name.toLowerCase().includes(query);
+    if (match) {
+      const formattedVal = typeof val === "number" ? val.toLocaleString() : val;
+      html += `<tr><td>${col.code}</td><td>${col.name}</td><td>${formattedVal}</td></tr>`;
+    }
+  });
+
+  html += `</tbody></table>`;
+  explorerResult.innerHTML = html;
+}
+
+function enableSimulation() {
+  activeRows = [];
+  renderSimulationInputs();
+}
+
+function renderSimulationInputs() {
+  let html = `<div class="sim-row">
+    <select id="sim-code-select">
+      <option value="">-- 부문 선택 --</option>
+      ${modelData.basic_sectors.map(s => `<option value="${s.code}">[${s.code}] ${s.name}</option>`).join("")}
+    </select>
+    <input type="number" id="sim-amount-input" placeholder="증가액 (백만원)" min="0">
+    <button id="add-sim-btn" type="button">추가</button>
+  </div>`;
+
+  if (activeRows.length > 0) {
+    html += `<ul>`;
+    activeRows.forEach((item, idx) => {
+      html += `<li>[${item.code}] ${item.name}: ${item.amount.toLocaleString()} 백만원 
+        <button onclick="removeSimItem(${idx})" type="button">삭제</button></li>`;
+    });
+    html += `</ul>`;
+    html += `<button id="run-sim-btn" type="button">시뮬레이션 실행</button>`;
+  }
+
+  simulationInputs.innerHTML = html;
+
+  document.getElementById("add-sim-btn")?.addEventListener("click", () => {
+    const code = document.getElementById("sim-code-select").value;
+    const amount = parseFloat(document.getElementById("sim-amount-input").value);
+    if (!code || isNaN(amount) || amount <= 0) {
+      alert("올바른 부문과 양의 금액을 입력하세요.");
       return;
     }
-
-    const sheetObj = data.sheets[sheetName];
-    if (sheetObj && sheetObj.rows) {
-      sheetObj.rows.forEach((r, idx) => {
-        const opt = document.createElement('option');
-        opt.value = idx;
-        opt.textContent = `[${r.code || idx}] ${r.name}`;
-        rowSelect.appendChild(opt);
-      });
-      rowSelect.disabled = false;
-    }
+    const sector = modelData.basic_sectors.find(s => s.code === code);
+    activeRows.push({ code: sector.code, name: sector.name, amount: amount });
+    renderSimulationInputs();
   });
 
-  const renderTable = () => {
-    const sheetName = sheetSelect.value;
-    const rowIdx = rowSelect.value;
-    const query = searchInput.value.toLowerCase();
-    const container = document.getElementById('explorer-table-container');
-
-    if (!sheetName || rowIdx === "" || !container) return;
-
-    const rowData = data.sheets[sheetName].rows[rowIdx];
-    const columns = data.sheets[sheetName].columns || [];
-
-    let html = `<h3 style="margin-top:15px;">${rowData.name} (${rowData.code || ''}) 데이터</h3>`;
-    html += `<table><thead><tr><th>열 코드</th><th>열 이름</th><th>값 (백만원)</th></tr></thead><tbody>`;
-
-    columns.forEach((col, i) => {
-      const val = rowData.values[i];
-      const match = (col.code && col.code.toLowerCase().includes(query)) || 
-                    (col.name && col.name.toLowerCase().includes(query));
-      if (match) {
-        html += `<tr><td>${col.code || ''}</td><td>${col.name || ''}</td><td>${Number(val).toLocaleString()}</td></tr>`;
-      }
+  document.getElementById("run-sim-btn")?.addEventListener("click", () => {
+    if (activeRows.length === 0) return;
+    setStatus("시뮬레이션 연산 중...");
+    const shockDict = {};
+    activeRows.forEach(item => {
+      shockDict[item.code] = (shockDict[item.code] || 0) + item.amount;
     });
-    html += `</tbody></table>`;
-    container.innerHTML = html;
-  };
-
-  rowSelect.addEventListener('change', () => {
-    searchInput.disabled = false;
-    renderTable();
+    worker.postMessage({ type: "simulate", payload: shockDict });
   });
-  searchInput.addEventListener('input', renderTable);
+}
+
+function removeSimItem(idx) {
+  activeRows.splice(idx, 1);
+  renderSimulationInputs();
+}
+
+function renderSimulationResult(res) {
+  setStatus("시뮬레이션 완료");
+  
+  let summaryHtml = `<h3>요약 결과</h3>
+  <table>
+    <tr><th>항목</th><th>금액 (백만원)</th></tr>
+    <tr><td>총 생산유발액</td><td>${res.summary.total_production.toLocaleString()}</td></tr>
+    <tr><td>총 부가가치유발액</td><td>${res.summary.total_value_added.toLocaleString()}</td></tr>
+    <tr><td>총 수입유발액</td><td>${res.summary.total_import.toLocaleString()}</td></tr>
+  </table>`;
+  simulationSummary.innerHTML = summaryHtml;
+
+  let top15Html = `<h3>생산유발액 상위 15개 산업</h3>
+  <table><thead><tr><th>순위</th><th>코드</th><th>산업명</th><th>생산유발액</th></tr></thead><tbody>`;
+  res.top15.forEach((item, idx) => {
+    top15Html += `<tr><td>${idx + 1}</td><td>${item.code}</td><td>${item.name}</td><td>${item.production.toLocaleString()}</td></tr>`;
+  });
+  top15Html += `</tbody></table>`;
+  simulationTop15.innerHTML = top15Html;
 }
