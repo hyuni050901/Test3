@@ -1,4 +1,4 @@
-// worker.js - openpyxl 호환성 패치 버전
+// worker.js - openpyxl 및 numpy 패키지 자동 설치 버전
 importScripts("https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js");
 
 let pyodide = null;
@@ -8,10 +8,9 @@ async function initPyodide() {
     self.postMessage({ type: "status", message: "Pyodide 환경 초기화 중..." });
     pyodide = await loadPyodide();
 
-    self.postMessage({ type: "status", message: "micropip 및 openpyxl 패키지 설치 중..." });
-    await pyodide.loadPackage("micropip");
-    const micropip = pyodide.pyimport("micropip");
-    await micropip.install("openpyxl");
+    self.postMessage({ type: "status", message: "필수 파이썬 라이브러리(numpy, openpyxl) 로딩 중..." });
+    // numpy와 openpyxl을 함께 로드합니다.
+    await pyodide.loadPackage(["numpy", "openpyxl"]);
 
     self.postMessage({ type: "status", message: "model.py 읽는 중..." });
     const modelCode = await (await fetch("model.py")).text();
