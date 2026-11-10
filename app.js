@@ -1,5 +1,5 @@
 // ==========================================
-// 1. 페이지 전환 (CSS 기반 display 제어)
+// 1. 페이지 전환 제어 (CSS .active 기반)
 // ==========================================
 function showPage(pageId) {
   const pages = document.querySelectorAll('.page-view');
@@ -13,7 +13,7 @@ function showPage(pageId) {
 }
 
 // ==========================================
-// 2. Sample_IO 교수님 원본 app.js 통신 복구
+// 2. Sample_IO 원본 동작 및 이벤트 연동 (100% 복구)
 // ==========================================
 const statusEl = document.getElementById("status");
 const loadBasicBtn = document.getElementById("load-basic");
@@ -83,7 +83,7 @@ if (sheetSelect) {
   sheetSelect.addEventListener("change", () => {
     const sheetIdx = sheetSelect.value;
     rowSelect.innerHTML = '<option value="">-- 행을 선택하세요 --</option>';
-    explorerResult.innerHTML = "";
+    if (explorerResult) explorerResult.innerHTML = "";
     if (sheetIdx === "") {
       rowSelect.disabled = true;
       searchInput.disabled = true;
@@ -104,7 +104,7 @@ if (rowSelect) {
   rowSelect.addEventListener("change", () => {
     if (rowSelect.value === "") {
       searchInput.disabled = true;
-      explorerResult.innerHTML = "";
+      if (explorerResult) explorerResult.innerHTML = "";
       return;
     }
     searchInput.disabled = false;
@@ -121,7 +121,7 @@ if (searchInput) {
 function renderExplorerTable() {
   const sheetIdx = sheetSelect.value;
   const rowIdx = rowSelect.value;
-  if (sheetIdx === "" || rowIdx === "") return;
+  if (sheetIdx === "" || rowIdx === "" || !explorerResult) return;
 
   const sheet = modelData.sheets[sheetIdx];
   const row = sheet.rows[rowIdx];
