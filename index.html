@@ -13,7 +13,6 @@
     <p>12개 원자료 시트 탐색과 380개 부문 수요충격 분석</p>
   </header>
 
-  <!-- 상단 네비게이션 메뉴 -->
   <nav aria-label="주요 메뉴">
     <a href="#" onclick="showPage('main'); return false;">홈으로</a>
     <a href="#" onclick="showPage('explorer'); return false;">원자료 탐색</a>
@@ -21,101 +20,77 @@
   </nav>
 
   <main>
-    <!-- 데이터 로딩 상태 표시바 -->
     <aside aria-label="분석 준비 상태" class="loading-status">
       <p id="status" role="status">"기본부문 불러오기" 버튼을 눌러 자료를 불러오세요.</p>
     </aside>
 
-    <!-- [PAGE 1] 메인 대문 화면 (메인 카드로 이동 선택) -->
+    <!-- PAGE 1: 메인 기능 선택 페이지 -->
     <section id="page-main" class="page-view active">
       <div class="main-card-container">
         <h2>원하는 기능을 선택하세요</h2>
-        <p class="subtitle">산업연관표 원자료 탐색 또는 수요충격 시뮬레이터를 선택하여 이동할 수 있습니다.</p>
+        <p class="subtitle">산업연관표 원자료 탐색 또는 수요충격 시뮬레이터를 선택하여 이동하세요.</p>
         
         <div class="card-grid">
-          <!-- 카드 1: 원자료 탐색 -->
           <div class="card">
             <div class="card-icon">📊</div>
             <h3>원자료 탐색</h3>
-            <p>12개 원자료 시트 및 380개 기본부문의 행/열 연결 구조와 시트별 투입 데이터를 자유롭게 조회하고 검색합니다.</p>
+            <p>12개 원자료 시트 및 380개 기본부문의 행/열 연결 구조와 데이터를 확인합니다.</p>
             <button type="button" class="btn-primary" onclick="showPage('explorer')">원자료 탐색 창으로 이동</button>
           </div>
 
-          <!-- 카드 2: 수요충격 시뮬레이터 -->
           <div class="card">
             <div class="card-icon">🚀</div>
             <h3>수요충격 시뮬레이터</h3>
-            <p>국내 생산물 최종수요 변화에 따른 산업별 생산·수입·부가가치 유발효과 및 상위 15개 파급 산업을 시뮬레이션합니다.</p>
+            <p>국내 생산물 최종수요 변화에 따른 생산·수입·부가가치 유발효과를 시뮬레이션합니다.</p>
             <button type="button" class="btn-primary" onclick="showPage('simulator')">시뮬레이터 창으로 이동</button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- [PAGE 2] 원자료 탐색 창 (샘플 원본 기능 100% 복구) -->
+    <!-- PAGE 2: 원자료 탐색 페이지 -->
     <section id="page-explorer" class="page-view">
       <div class="nav-back-bar">
         <button type="button" class="btn-secondary" onclick="showPage('main')">← 메인 화면으로 돌아가기</button>
       </div>
-
       <div class="section-heading">
         <h2>1. 원자료 탐색</h2>
         <button id="load-basic" type="button">기본부문 불러오기</button>
       </div>
-
-      <div id="explorer-controls" class="control-panel">
-        <p class="section-desc">선택한 행이 각 열과 어떻게 연결되는지 확인합니다. 산업 행뿐 아니라 원표의 합계·분석지표 행도 포함됩니다.</p>
-        
-        <div class="form-group">
-          <label for="sheet-select"><b>시트 선택:</b></label>
-          <select id="sheet-select" disabled>
-            <option value="">(자료를 먼저 불러오세요)</option>
-          </select>
+      <p class="section-desc">선택한 행이 각 열과 어떻게 연결되는지 확인합니다. 산업 행뿐 아니라 원표의 합계·분석지표 행도 포함됩니다.</p>
+      
+      <div class="controls-grid">
+        <div>
+          <label for="sheet-select"><b>시트 선택</b></label>
+          <select id="sheet-select" disabled><option value="">불러오기 후 선택 가능</option></select>
         </div>
-
-        <div class="form-group">
-          <label for="row-select"><b>행(산업/지표) 선택:</b></label>
-          <select id="row-select" disabled>
-            <option value="">(시트를 먼저 선택하세요)</option>
-          </select>
+        <div>
+          <label for="row-select"><b>행 선택</b></label>
+          <select id="row-select" disabled><option value="">시트를 먼저 선택하세요</option></select>
         </div>
-
-        <div class="form-group">
-          <label for="search-input"><b>열 검색:</b></label>
+        <div>
+          <label for="search-input"><b>열 검색</b></label>
           <input type="text" id="search-input" placeholder="열 코드 또는 열 이름 검색..." disabled>
         </div>
       </div>
 
-      <div id="explorer-result" class="table-container">
-        <!-- 원자료 데이터 테이블이 표시되는 위치 -->
-      </div>
+      <div id="explorer-table-container" style="margin-top:20px; overflow-x:auto;"></div>
     </section>
 
-    <!-- [PAGE 3] 수요충격 시뮬레이터 창 (샘플 원본 기능 100% 복구) -->
+    <!-- PAGE 3: 시뮬레이터 페이지 -->
     <section id="page-simulator" class="page-view">
       <div class="nav-back-bar">
         <button type="button" class="btn-secondary" onclick="showPage('main')">← 메인 화면으로 돌아가기</button>
       </div>
-
       <h2>2. 국내 생산물 최종수요 증가 시뮬레이션</h2>
       <p class="section-desc">수입 완제품 구매를 제외한 국내 생산물 최종수요 증가를 입력하세요. 여러 산업의 증가액은 합산됩니다. (단위: 백만원)</p>
-
-      <div id="simulation-inputs" class="simulation-container">
-        <!-- 시뮬레이션 입력 시나리오 줄들이 형성되는 위치 -->
-      </div>
-
-      <div id="simulation-summary" class="summary-container">
-        <!-- 시뮬레이션 요약 결과 표 위치 -->
-      </div>
-
-      <div id="simulation-top15" class="top15-container">
-        <!-- 생산유발액 상위 15개 산업 결과 위치 -->
-      </div>
+      
+      <div id="simulation-inputs-container" style="margin-top:20px;"></div>
+      <div id="simulation-results-container" style="margin-top:20px;"></div>
     </section>
   </main>
 
   <footer>브라우저 계산 · GitHub Pages 배포용</footer>
-  
   <script src="app.js"></script>
 </body>
 </html>
