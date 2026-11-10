@@ -71,3 +71,32 @@
   <script src="app.js"></script>
 </body>
 </html>
+// 1. 기존 자료 불러오기 버튼 이벤트 연결 보장
+document.addEventListener('DOMContentLoaded', () => {
+    const loadBtn = document.getElementById('load-basic');
+    if (loadBtn) {
+        // 기존 불러오기 함수가 loadData 또는 initPyodide 등으로 정의되어 있다면 연결
+        loadBtn.addEventListener('click', () => {
+            console.log("기본부문 불러오기 시작");
+            // 기존 엑셀 불러오기 함수 실행
+            if (typeof loadData === 'function') loadData();
+            else if (typeof init === 'function') init();
+        });
+    }
+});
+
+// 2. 페이지 전환 함수 (기존 구역들이 정상 노출되도록 보장)
+function showPage(pageId) {
+    const pages = document.querySelectorAll('.page-view');
+    pages.forEach(page => {
+        page.classList.remove('active');
+    });
+
+    const targetPage = document.getElementById(`page-${pageId}`);
+    if (targetPage) {
+        targetPage.classList.add('active');
+    }
+
+    // 화면 맨 위로 스크롤
+    window.scrollTo(0, 0);
+}
