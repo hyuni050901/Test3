@@ -1,4 +1,4 @@
-// worker.js - openpyxl 및 numpy 패키지 자동 설치 버전
+// worker.js - 캐시 방지 및 numpy, openpyxl 동시 로드 최신 버전
 importScripts("https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js");
 
 let pyodide = null;
@@ -8,24 +8,24 @@ async function initPyodide() {
     self.postMessage({ type: "status", message: "Pyodide 환경 초기화 중..." });
     pyodide = await loadPyodide();
 
-    self.postMessage({ type: "status", message: "필수 파이썬 라이브러리(numpy, openpyxl) 로딩 중..." });
-    // numpy와 openpyxl을 함께 로드합니다.
+    self.postMessage({ type: "status", message: "파이썬 라이브러리(numpy, openpyxl) 설치 중..." });
+    // Pyodide 공식 로더로 두 패키지 동시 로드
     await pyodide.loadPackage(["numpy", "openpyxl"]);
 
-    self.postMessage({ type: "status", message: "model.py 읽는 중..." });
-    const modelCode = await (await fetch("model.py")).text();
+    self.postMessage({ type: "status", message: "model.py 로딩 중..." });
+    // 캐시 방지를 위해 timestamp 붙여서 읽기
+    const modelCode = await (await fetch("model.py?v=" + Date.now())).text();
     await pyodide.runPythonAsync(modelCode);
 
-    self.postMessage({ type: "status", message: "data/io-2023.xlsx 읽어오는 중..." });
-    const response = await fetch("data/io-2023.xlsx");
-    if (!response.ok) throw new Error("data/io-2023.xlsx 파일을 찾을 수 없습니다.");
+    self.postMessage({ type: "status", message: "data/io-2023.xlsx 분석 중..." });
+    const response = await fetch("data/io-2023.xlsx?v=" + Date.now());
+    if (!response.ok) throw new Error("data/io-2023.xlsx 읽기 실패");
     const arrayBuffer = await response.arrayBuffer();
-    
-    // Pyodide 가상 파일시스템에 data 폴더 생성 및 엑셀 저장
+
     try { pyodide.FS.mkdir("data"); } catch(e) {}
     pyodide.FS.writeFile("data/io-2023.xlsx", new Uint8Array(arrayBuffer));
 
-    self.postMessage({ type: "status", message: "기본 부문 데이터 계산 중..." });
+    self.postMessage({ type: "status", message: "기본 부문 데이터 구조 계산 중..." });
     const jsonStr = await pyodide.runPythonAsync("load_and_prepare_data()");
     const payload = JSON.parse(jsonStr);
 
