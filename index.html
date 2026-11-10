@@ -57,9 +57,9 @@
         <h2>1. 원자료 탐색</h2>
         <button id="load-basic" type="button">기본부문 불러오기</button>
       </div>
-      <p class="section-desc">선택한 행이 각 열과 어떻게 연결되는지 확인합니다. 산업 행뿐 아니라 원표의 합계·분석지표 행도 포함됩니다.</p>
+      <p class="section-desc">선택한 행이 각 열과 어떻게 연결되는지 확인합니다.</p>
       
-      <div class="controls-grid">
+      <div id="explorer-controls" class="controls-grid">
         <div>
           <label for="sheet-select"><b>시트 선택</b></label>
           <select id="sheet-select" disabled><option value="">불러오기 후 선택 가능</option></select>
@@ -74,7 +74,7 @@
         </div>
       </div>
 
-      <div id="explorer-table-container" style="margin-top:20px; overflow-x:auto;"></div>
+      <div id="explorer-result" style="margin-top:20px; overflow-x:auto;"></div>
     </section>
 
     <!-- PAGE 3: 시뮬레이터 페이지 -->
@@ -83,10 +83,11 @@
         <button type="button" class="btn-secondary" onclick="showPage('main')">← 메인 화면으로 돌아가기</button>
       </div>
       <h2>2. 국내 생산물 최종수요 증가 시뮬레이션</h2>
-      <p class="section-desc">수입 완제품 구매를 제외한 국내 생산물 최종수요 증가를 입력하세요. 여러 산업의 증가액은 합산됩니다. (단위: 백만원)</p>
+      <p class="section-desc">수입 완제품 구매를 제외한 국내 생산물 최종수요 증가를 입력하세요. (단위: 백만원)</p>
       
-      <div id="simulation-inputs-container" style="margin-top:20px;"></div>
-      <div id="simulation-results-container" style="margin-top:20px;"></div>
+      <div id="simulation-inputs" style="margin-top:20px;"></div>
+      <div id="simulation-summary" style="margin-top:20px;"></div>
+      <div id="simulation-top15" style="margin-top:20px;"></div>
     </section>
   </main>
 
