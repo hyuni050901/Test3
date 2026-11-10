@@ -13,7 +13,7 @@ function showPage(pageId) {
 }
 
 // ==========================================
-// 2. Sample_IO 원본 동작 및 이벤트 연동 (100% 복구)
+// 2. Sample_IO 원본 동작 및 캐시 방지 연동
 // ==========================================
 const statusEl = document.getElementById("status");
 const loadBasicBtn = document.getElementById("load-basic");
@@ -37,7 +37,9 @@ function setStatus(message, isError = false) {
 }
 
 function initWorker() {
-  worker = new Worker("worker.js");
+  // 캐시 방지(?v=timestamp) 적용
+  worker = new Worker("worker.js?v=" + Date.now());
+  
   worker.onmessage = (e) => {
     const msg = e.data;
     if (msg.type === "status") {
