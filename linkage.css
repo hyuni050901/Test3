@@ -1,0 +1,6 @@
+.xcards { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 12px 0; }
+.xcard { border: 1px solid rgba(128,128,128,.35); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+.xcard strong { font-size: 1.5em; }
+.xcard small { opacity: .7; }
+.link-chart svg { width: 100%; max-width: 720px; height: auto; display: block; }
+.link-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin: 12px 0; }
