@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 
-<html lang="ko"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>과제물1: 산업연관표분석 웹앱</title><link href="./style.css" rel="stylesheet"/><link href="./nav.css" rel="stylesheet"/><script defer="" src="./app.js"></script><script defer="" src="./nav.js"></script></head>
+<html lang="ko"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>과제물1: 산업연관표분석 웹앱</title><link href="./style.css" rel="stylesheet"/><link href="./nav.css" rel="stylesheet"/><link href="./extra.css" rel="stylesheet"/><script defer="" src="./app.js"></script><script defer="" src="./nav.js"></script><script defer="" src="./extra.js"></script></head>
 <body><header><p>2023 · 생산자가격 · 기본부문</p><h1>과제물1: 산업연관표분석 웹앱</h1><p>12개 원자료 시트 탐색과 380개 부문 수요충격 분석</p></header>
-<nav aria-label="주요 메뉴"><a href="#" data-page="main">홈으로</a><a href="#" data-page="explorer">원자료 탐색</a><a href="#" data-page="simulation">시뮬레이터</a></nav><main>
+<nav aria-label="주요 메뉴"><a href="#" data-page="main">홈으로</a><a href="#" data-page="explorer">원자료 탐색</a><a href="#" data-page="simulation">시뮬레이터</a><a href="#" data-page="compare">시나리오 비교</a><a href="#" data-page="guide">이용 안내</a></nav><main>
 <aside aria-label="분석 준비 상태" class="loading-status"><p id="status" role="status">"기본부문 불러오기" 버튼을 눌러 자료를 불러오세요.</p><details><summary>계수 검증 결과</summary><pre id="validation">아직 자료를 불러오지 않았습니다.</pre></details></aside>
 
 <!-- PAGE 1: 메인 (기능 선택) -->
@@ -12,6 +12,8 @@
 <div class="menu-cards">
 <div class="menu-card"><h3>📊 원자료 탐색</h3><p>12개 원자료 시트와 380개 기본부문의 행/열 연결 구조를 확인합니다.</p><button type="button" data-page="explorer">원자료 탐색으로 이동</button></div>
 <div class="menu-card"><h3>🚀 수요충격 시뮬레이터</h3><p>최종수요 변화에 따른 생산·수입·부가가치 유발효과를 계산합니다.</p><button type="button" data-page="simulation">시뮬레이터로 이동</button></div>
+<div class="menu-card"><h3>⚖️ 시나리오 비교</h3><p>저장한 시나리오들의 유발효과를 표와 그래프로 나란히 비교합니다.</p><button type="button" data-page="compare">시나리오 비교로 이동</button></div>
+<div class="menu-card"><h3>📖 이용 안내</h3><p>사용 순서와 생산유발액·부가가치유발액 등 용어를 설명합니다.</p><button type="button" data-page="guide">이용 안내로 이동</button></div>
 </div>
 </div>
 
@@ -25,6 +27,43 @@
 <div id="page-simulation" class="page-view">
 <p class="back-bar"><button type="button" data-page="main">← 메인 화면으로 돌아가기</button></p>
 <section id="simulation"><h2>2. 국내 생산물 최종수요 증가 시뮬레이션</h2><p>수입 완제품 구매를 제외한 국내 생산물 최종수요 증가를 입력하세요. 여러 산업의 증가액은 합산됩니다.</p><label>산업 검색<input disabled="" id="sector-search" placeholder="산업 이름 또는 코드"/></label><form id="scenario"><label>산업<select disabled="" id="sector" required=""></select></label><label>증가액 (백만원)<input disabled="" id="amount" min="0.01" required="" step="any" type="number" value="1000"/></label><p class="note">1,000백만원 = 10억원. 이번 버전은 양의 수요 증가만 지원합니다.</p><button disabled="" id="add">시나리오에 추가</button></form><ul id="basket"></ul><button disabled="" id="run">파급효과 계산</button><button id="clear">시나리오 비우기</button><p id="sim-status" role="status">시나리오를 추가하세요.</p><div hidden="" id="results"><div class="cards" id="cards"></div><h3>생산유발액 상위 15개 산업</h3><div id="bars"></div><button id="download">전체 380개 산업 CSV 다운로드</button><div class="scroll"><table><caption>산업별 유발액 — 백만원, 생산유발액 내림차순</caption><thead><tr><th>코드</th><th>산업</th><th>생산</th><th>수입</th><th>부가가치</th></tr></thead><tbody id="result-rows"></tbody></table></div></div></section>
+</div>
+
+<!-- PAGE 4: 시나리오 비교 -->
+<div id="page-compare" class="page-view">
+<p class="back-bar"><button type="button" data-page="main">← 메인 화면으로 돌아가기</button></p>
+<h2>3. 시나리오 비교</h2>
+<p>시뮬레이터에서 계산한 결과를 최대 5개까지 저장해 나란히 비교합니다. 저장한 시나리오는 이 브라우저에 보관됩니다.</p>
+<div id="compare-body"></div>
+</div>
+
+<!-- PAGE 5: 이용 안내 -->
+<div id="page-guide" class="page-view">
+<p class="back-bar"><button type="button" data-page="main">← 메인 화면으로 돌아가기</button></p>
+<h2>이용 안내</h2>
+<h3>사용 순서</h3>
+<ol>
+<li><b>원자료 탐색</b>에서 시트와 행을 고르면, 그 행이 각 열과 어떻게 연결되는지 원자료 값으로 확인할 수 있습니다.</li>
+<li><b>시뮬레이터</b>에서 산업과 최종수요 증가액(백만원)을 입력해 <b>시나리오에 추가</b>합니다. 여러 산업을 추가하면 증가액이 합산됩니다.</li>
+<li><b>파급효과 계산</b>을 누르면 생산·수입·부가가치 유발효과가 표와 그래프로 나옵니다.</li>
+<li>결과가 마음에 들면 <b>이 결과를 비교용으로 저장</b>을 눌러 <b>시나리오 비교</b>에서 다른 시나리오와 견줘 보세요.</li>
+</ol>
+<h3>용어 설명</h3>
+<dl class="guide-terms">
+<dt>최종수요</dt><dd>중간 재료로 쓰이지 않고 소비, 투자, 수출 등으로 최종 사용되는 수요입니다. 이 앱에서는 <b>국내 생산물</b>에 대한 최종수요 증가만 입력합니다. 수입 완제품 구매는 제외합니다.</dd>
+<dt>생산유발액</dt><dd>최종수요가 늘었을 때, 이를 충족하기 위해 여러 산업에서 연쇄적으로 늘어나는 국내 생산액의 합계입니다. 생산유발계수에 증가액을 곱해 계산합니다.</dd>
+<dt>수입유발액</dt><dd>그 생산 과정에서 추가로 필요해지는 수입품의 금액입니다.</dd>
+<dt>부가가치유발액</dt><dd>생산 과정에서 새로 만들어지는 부가가치(임금, 영업이익 등)의 금액입니다.</dd>
+<dt>생산유발 승수</dt><dd>생산유발액을 최종수요 증가액으로 나눈 값입니다. 1보다 클수록 한 번의 수요 증가가 여러 산업으로 더 크게 퍼진다는 뜻입니다.</dd>
+<dt>단위</dt><dd>모든 금액은 <b>백만원</b>입니다. 1,000백만원은 10억원이고, 1,000,000백만원은 1조원입니다.</dd>
+</dl>
+<h3>해석할 때 유의할 점</h3>
+<ul>
+<li>2023년 생산자가격 기준 380개 기본부문 자료를 사용합니다.</li>
+<li>산업연관분석은 산업 간 투입 관계가 고정되어 있다고 가정하는 모형입니다. 가격 변화, 생산능력의 한계, 시간에 따른 구조 변화는 반영하지 않습니다.</li>
+<li>따라서 결과는 실제 예측값이 아니라 "수요가 이만큼 늘면 현재의 산업 구조에서 이 정도 파급된다"는 기준 추정치로 보세요.</li>
+<li>이번 버전은 양의 수요 증가만 지원합니다.</li>
+</ul>
 </div>
 
 </main><footer>브라우저 계산 · GitHub Pages 배포용</footer></body></html>
