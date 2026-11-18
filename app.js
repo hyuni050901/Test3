@@ -58,12 +58,25 @@ function initWorker() {
       setStatus(msg.message);
     } else if (msg.type === "ready") {
       modelData = msg.payload;
-      setStatus("자료 준비 완료: " + (modelData.metadata ? modelData.metadata.basic_title : "2023년 기본부문"));
-      if (loadBasicBtn) loadBasicBtn.disabled = true;
-      enableExplorer();
-      enableSimulation();
+      console.log("[ready] payload 키:", Object.keys(modelData || {}), modelData);
+      try {
+        setStatus("자료 준비 완료: " + (modelData.metadata ? modelData.metadata.basic_title : "2023년 기본부문"));
+        if (loadBasicBtn) loadBasicBtn.disabled = true;
+        enableExplorer();
+        enableSimulation();
+      } catch (err) {
+        console.error(err);
+        setStatus("데이터 구조 불일치: " + err.message + " (model.py가 돌려주는 JSON 구조를 확인하세요)", true);
+        renderSimulationPlaceholder("데이터 구조가 app.js와 맞지 않습니다: " + err.message);
+      }
     } else if (msg.type === "simulationResult") {
-      renderSimulationResult(msg.payload);
+      try {
+        renderSimulationResult(msg.payload);
+      } catch (err) {
+        console.error(err);
+        console.log("[simulationResult] payload:", msg.payload);
+        setStatus("결과 표시 오류: " + err.message, true);
+      }
     } else if (msg.type === "error") {
       handleLoadError(msg.message);
     }
