@@ -3,13 +3,12 @@
 <html lang="ko"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>과제물1: 산업연관표분석 웹앱</title><link href="./style.css" rel="stylesheet"/><link href="./nav.css" rel="stylesheet"/><link href="./extra.css" rel="stylesheet"/><link href="./linkage.css" rel="stylesheet"/><script defer="" src="./app.js"></script><script defer="" src="./nav.js"></script><script defer="" src="./extra.js"></script><script defer="" src="./linkage.js"></script></head>
 <body><header><p>2023 · 생산자가격 · 기본부문</p><h1>과제물1: 산업연관표분석 웹앱</h1><p>12개 원자료 시트 탐색과 380개 부문 수요충격 분석</p></header>
 <nav aria-label="주요 메뉴"><a href="#" data-page="main">홈으로</a><a href="#" data-page="explorer">원자료 탐색</a><a href="#" data-page="simulation">시뮬레이터</a><a href="#" data-page="compare">시나리오 비교</a><a href="#" data-page="linkage">영향력·감응도</a><a href="#" data-page="guide">이용 안내</a></nav><main>
-<aside aria-label="분석 준비 상태" class="loading-status"><p id="status" role="status">"기본부문 불러오기" 버튼을 눌러 자료를 불러오세요.</p><details><summary>계수 검증 결과</summary><pre id="validation">아직 자료를 불러오지 않았습니다.</pre></details></aside>
+<aside aria-label="분석 준비 상태" class="loading-status"><div class="status-text"><p id="status" role="status">"기본부문 불러오기" 버튼을 눌러 자료를 불러오세요.</p><details><summary>계수 검증 결과</summary><pre id="validation">아직 자료를 불러오지 않았습니다.</pre></details></div><button id="load-basic" type="button">기본부문 불러오기</button></aside>
 
 <!-- PAGE 1: 메인 (기능 선택) -->
 <div id="page-main" class="page-view active">
 <h2>원하는 기능을 선택하세요</h2>
-<p>기능을 선택하면 필요한 자료를 자동으로 불러옵니다. 미리 불러오려면 아래 버튼을 누르세요.</p>
-<p><button id="load-basic" type="button">기본부문 불러오기</button></p>
+<p>기능을 선택하면 필요한 자료를 자동으로 불러옵니다.</p>
 <div class="menu-cards">
 <div class="menu-card"><h3>📊 원자료 탐색</h3><p>12개 원자료 시트와 380개 기본부문의 행/열 연결 구조를 확인합니다.</p><button type="button" data-page="explorer">원자료 탐색으로 이동</button></div>
 <div class="menu-card"><h3>🚀 수요충격 시뮬레이터</h3><p>최종수요 변화에 따른 생산·수입·부가가치 유발효과를 계산합니다.</p><button type="button" data-page="simulation">시뮬레이터로 이동</button></div>
