@@ -1,5 +1,5 @@
-// worker.js - Pyodide v0.23.4 (numpy, openpyxl) + model.py(initialize / explore / simulate)
-importScripts("https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js");
+// worker.js - Pyodide v0.26.4 (numpy, openpyxl) + model.py(initialize / explore / simulate)
+importScripts("https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js");
 
 let pyodide = null;
 let ready = false;
@@ -16,7 +16,7 @@ function cleanError(err) {
 }
 
 async function initPyodide() {
-  post("status", { message: "Pyodide v0.23.4 엔진 초기화 중..." });
+  post("status", { message: "Pyodide v0.26.4 엔진 초기화 중..." });
   pyodide = await loadPyodide();
 
   post("status", { message: "파이썬 패키지(numpy, openpyxl) 로딩 중..." });
