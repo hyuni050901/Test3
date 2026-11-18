@@ -26,3 +26,6 @@
 .save-bar input { display: inline-block; width: min(280px, 100%); margin: 0 8px 0 0; }
 .example-box { margin: 12px 0; }
 .xtable td button { padding: 4px 10px; margin: 0; font-size: .85rem; }
+
+/* 상위 15개 차트 지표 선택 */
+.bars-metric-label { max-width: 320px; }
