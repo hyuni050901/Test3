@@ -19,3 +19,21 @@
 .back-bar button { cursor: pointer; }
 .back-bar { margin: 0 0 16px; }
 nav a { cursor: pointer; }
+
+/* 상태 박스: 왼쪽 안내문 / 오른쪽 불러오기 버튼 */
+.loading-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.loading-status .status-text {
+  flex: 1;
+  min-width: 240px;
+}
+.loading-status button {
+  flex: none;
+  margin: 0;
+  white-space: nowrap;
+}
