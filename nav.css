@@ -1,0 +1,21 @@
+/* 페이지 전환 */
+.page-view { display: none; }
+.page-view.active { display: block; }
+
+/* 메인 선택 화면 */
+.menu-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+.menu-card {
+  border: 1px solid #d9dee7;
+  border-radius: 10px;
+  padding: 20px;
+}
+.menu-card h3 { margin-top: 0; }
+.menu-card button,
+.back-bar button { cursor: pointer; }
+.back-bar { margin: 0 0 16px; }
+nav a { cursor: pointer; }
