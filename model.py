@@ -7,7 +7,7 @@ def emit(x):
     return json.dumps(x, ensure_ascii=False, allow_nan=False)
 
 def initialize(raw):
-    global book, codes, names, L, M, V, sheets, valid
+    global book, codes, names, L, M, V, AD, sheets, valid
     wb = openpyxl.load_workbook(io.BytesIO(bytes(raw)), read_only=True, data_only=True)
     book = {s: list(wb[s].values) for s in wb.sheetnames}
     wb.close()
@@ -27,6 +27,7 @@ def initialize(raw):
         return a
     L = matrix('생산유발계수'); M = matrix('수입유발계수'); V = matrix('부가가치유발계수')
     ad = matrix('국산투입계수(Ad)'); am = matrix('수입투입계수(Am)')
+    AD = ad
     rows=book['총투입계수(A)']; ci={str(c):i for i,c in enumerate(rows[4])}
     vr=next(r for r in rows if str(r[0])=='9690')
     v=np.array([vr[ci[c]] for c in codes],dtype=float)
@@ -62,8 +63,12 @@ def simulate(payload):
         f[codes.index(s['code'])]+=a
     if not f.sum()>0: raise ValueError('한 산업 이상의 양의 수요 증가액을 입력하세요.')
     x=L@f; m=M@f; v=V@f
+    demand=float(f.sum()); total=float(x.sum())
+    first=float((AD@f).sum())
+    # x = f + Ad·f + (나머지 간접효과)
+    decomp={'initial':demand,'first':first,'later':total-demand-first}
     result=[{'code':c,'name':n,'production':float(a),'imports':float(b),'valueAdded':float(d)}
             for c,n,a,b,d in zip(codes,names,x,m,v)]
     result.sort(key=lambda r:r['production'],reverse=True)
-    return emit({'demand':float(f.sum()),'production':float(x.sum()),'imports':float(m.sum()),
-                 'valueAdded':float(v.sum()),'multiplier':float(x.sum()/f.sum()),'rows':result})
+    return emit({'demand':demand,'production':total,'imports':float(m.sum()),
+                 'valueAdded':float(v.sum()),'multiplier':total/demand,'decomp':decomp,'rows':result})
