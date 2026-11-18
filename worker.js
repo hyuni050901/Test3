@@ -2,6 +2,7 @@ const BASE = 'https://cdn.jsdelivr.net/pyodide/v0.27.7/full/';
 let py;
 let chain = Promise.resolve();
 let linkageReady = false;
+let structureReady = false;
 
 // [추가] 영향력계수·감응도계수 계산용 파이썬 코드 (model.py의 전역 변수 codes, names, L 사용)
 const LINKAGE_PY = `
@@ -16,6 +17,21 @@ def linkages():
                      'influence': float(col[i]) / avg, 'sensitivity': float(row[i]) / avg,
                      'colSum': float(col[i]), 'rowSum': float(row[i])})
     return emit({'average': avg, 'rows': rows})
+`;
+
+// [추가] 수입·부가가치 지도용 파이썬 코드 (model.py의 전역 변수 codes, names, L, M, V 사용)
+// 열합계 = 해당 산업의 최종수요 1단위당 유발효과
+const STRUCTURE_PY = `
+def structure():
+    prod = L.sum(axis=0)
+    imp = M.sum(axis=0)
+    va = V.sum(axis=0)
+    rows = []
+    for i in range(len(codes)):
+        rows.append({'code': codes[i], 'name': names[i],
+                     'production': float(prod[i]), 'imports': float(imp[i]), 'valueAdded': float(va[i])})
+    return emit({'avgProduction': float(prod.mean()), 'avgImports': float(imp.mean()),
+                 'avgValueAdded': float(va.mean()), 'rows': rows})
 `;
 
 async function handle({id,type,payload}) {
@@ -40,9 +56,11 @@ async function handle({id,type,payload}) {
       py.globals.set('row_input',payload.row||'');
       result=py.runPython('explore(sheet_input, row_input)');
     } else if(type==='linkage') {
-      // [추가] 영향력계수·감응도계수
       if(!linkageReady) { await py.runPythonAsync(LINKAGE_PY); linkageReady=true; }
       result=py.runPython('linkages()');
+    } else if(type==='structure') {
+      if(!structureReady) { await py.runPythonAsync(STRUCTURE_PY); structureReady=true; }
+      result=py.runPython('structure()');
     } else {
       py.globals.set('scenario_input',JSON.stringify(payload));
       result=py.runPython('simulate(scenario_input)');
