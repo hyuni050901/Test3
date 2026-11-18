@@ -27,7 +27,9 @@
 <!-- PAGE 3: 시뮬레이터 -->
 <div id="page-simulation" class="page-view">
 <p class="back-bar"><button type="button" data-page="main">← 메인 화면으로 돌아가기</button></p>
-<section id="simulation"><h2>2. 국내 생산물 최종수요 증가 시뮬레이션</h2><p>수입 완제품 구매를 제외한 국내 생산물 최종수요 증가를 입력하세요. 여러 산업의 증가액은 합산됩니다.</p><label>산업 검색<input disabled="" id="sector-search" placeholder="산업 이름 또는 코드"/></label><form id="scenario"><label>산업<select disabled="" id="sector" required=""></select></label><label>증가액 (백만원)<input disabled="" id="amount" min="0.01" required="" step="any" type="number" value="1000"/></label><p class="note">1,000백만원 = 10억원. 이번 버전은 양의 수요 증가만 지원합니다.</p><button disabled="" id="add">시나리오에 추가</button></form><ul id="basket"></ul><button disabled="" id="run">파급효과 계산</button><button id="clear">시나리오 비우기</button><p id="sim-status" role="status">시나리오를 추가하세요.</p><div hidden="" id="results"><div class="cards" id="cards"></div><h3>생산유발액 상위 15개 산업</h3><div id="bars"></div><button id="download">전체 380개 산업 CSV 다운로드</button><div class="scroll"><table><caption>산업별 유발액 — 백만원, 생산유발액 내림차순</caption><thead><tr><th>코드</th><th>산업</th><th>생산</th><th>수입</th><th>부가가치</th></tr></thead><tbody id="result-rows"></tbody></table></div></div></section>
+<section id="simulation"><h2>2. 국내 생산물 최종수요 증가 시뮬레이션</h2><p>수입 완제품 구매를 제외한 국내 생산물 최종수요 증가를 입력하세요. 여러 산업의 증가액은 합산됩니다.</p>
+<div class="example-box" id="example-box"><p class="note">자료를 불러오면 예시 시나리오 버튼이 나타납니다.</p></div>
+<label>산업 검색<input disabled="" id="sector-search" placeholder="산업 이름 또는 코드"/></label><form id="scenario"><label>산업<select disabled="" id="sector" required=""></select></label><label>증가액<input disabled="" id="amount" min="0" required="" step="any" type="number" value="1000"/></label><label>단위<select id="amount-unit"><option value="1">백만원</option><option value="100">억원</option><option value="1000000">조원</option></select></label><p class="note">1억원 = 100백만원, 1조원 = 1,000,000백만원. 계산과 결과 표시는 백만원 기준입니다. 이번 버전은 양의 수요 증가만 지원합니다.</p><button disabled="" id="add">시나리오에 추가</button></form><ul id="basket"></ul><button disabled="" id="run">파급효과 계산</button><button id="clear">시나리오 비우기</button><p id="sim-status" role="status">시나리오를 추가하세요.</p><div hidden="" id="results"><div class="cards" id="cards"></div><h3>생산유발액 상위 15개 산업</h3><div id="bars"></div><button id="download">전체 380개 산업 CSV 다운로드</button><div class="scroll"><table><caption>산업별 유발액 — 백만원, 생산유발액 내림차순</caption><thead><tr><th>코드</th><th>산업</th><th>생산</th><th>수입</th><th>부가가치</th></tr></thead><tbody id="result-rows"></tbody></table></div></div></section>
 </div>
 
 <!-- PAGE 4: 시나리오 비교 -->
@@ -59,7 +61,7 @@
 <label>정렬<select id="link-sort"><option value="influence">영향력계수 높은 순</option><option value="sensitivity">감응도계수 높은 순</option><option value="code">산업 코드 순</option></select></label>
 <span id="link-count"></span>
 </div>
-<div class="scroll"><table class="xtable"><thead><tr><th>코드</th><th>산업</th><th>영향력계수</th><th>감응도계수</th><th>유형</th></tr></thead><tbody id="link-rows"></tbody></table></div>
+<div class="scroll"><table class="xtable"><thead><tr><th>코드</th><th>산업</th><th>영향력계수</th><th>감응도계수</th><th>유형</th><th>시뮬레이션</th></tr></thead><tbody id="link-rows"></tbody></table></div>
 <p><button type="button" id="link-download">전체 CSV 다운로드</button></p>
 <p class="note">생산유발계수(국산 투입 기준) 행렬에서 영향력계수는 열합계, 감응도계수는 행합계를 전체 평균으로 나눈 값입니다. 두 계수 모두 380개 산업의 평균이 1입니다.</p>
 </div>
@@ -72,10 +74,10 @@
 <h3>사용 순서</h3>
 <ol>
 <li><b>원자료 탐색</b>에서 시트와 행을 고르면, 그 행이 각 열과 어떻게 연결되는지 원자료 값으로 확인할 수 있습니다.</li>
-<li><b>시뮬레이터</b>에서 산업과 최종수요 증가액(백만원)을 입력해 <b>시나리오에 추가</b>합니다. 여러 산업을 추가하면 증가액이 합산됩니다.</li>
-<li><b>파급효과 계산</b>을 누르면 생산·수입·부가가치 유발효과가 표와 그래프로 나옵니다.</li>
-<li>결과가 마음에 들면 <b>이 결과를 비교용으로 저장</b>을 눌러 <b>시나리오 비교</b>에서 다른 시나리오와 견줘 보세요.</li>
-<li><b>영향력·감응도</b>에서는 수요 입력 없이 산업 구조 자체의 연쇄효과를 볼 수 있습니다.</li>
+<li><b>시뮬레이터</b>에서 산업과 최종수요 증가액을 입력해 <b>시나리오에 추가</b>합니다. 단위(백만원·억원·조원)를 고를 수 있고, 여러 산업을 추가하면 증가액이 합산됩니다. 자료를 불러오면 나타나는 <b>예시 시나리오</b> 버튼을 누르면 바로 계산해 볼 수 있습니다.</li>
+<li><b>파급효과 계산</b>을 누르면 결과 요약, 승수, 단계별 구성이 표와 그래프로 나옵니다.</li>
+<li>결과가 마음에 들면 시나리오 이름을 적고 <b>이 결과를 비교용으로 저장</b>을 눌러 <b>시나리오 비교</b>에서 다른 시나리오와 견줘 보세요. 비교표는 CSV로 내려받을 수 있습니다.</li>
+<li><b>영향력·감응도</b>에서는 수요 입력 없이 산업 구조 자체의 연쇄효과를 볼 수 있고, 표의 <b>시뮬레이션</b> 버튼으로 해당 산업을 바로 시뮬레이터에 불러올 수 있습니다.</li>
 </ol>
 <h3>용어 설명</h3>
 <dl class="guide-terms">
@@ -83,10 +85,11 @@
 <dt>생산유발액</dt><dd>최종수요가 늘었을 때, 이를 충족하기 위해 여러 산업에서 연쇄적으로 늘어나는 국내 생산액의 합계입니다. 생산유발계수에 증가액을 곱해 계산합니다.</dd>
 <dt>수입유발액</dt><dd>그 생산 과정에서 추가로 필요해지는 수입품의 금액입니다.</dd>
 <dt>부가가치유발액</dt><dd>생산 과정에서 새로 만들어지는 부가가치(임금, 영업이익 등)의 금액입니다.</dd>
-<dt>생산유발 승수</dt><dd>생산유발액을 최종수요 증가액으로 나눈 값입니다. 1보다 클수록 한 번의 수요 증가가 여러 산업으로 더 크게 퍼진다는 뜻입니다.</dd>
+<dt>승수 (생산·수입·부가가치유발 승수)</dt><dd>각 유발액을 최종수요 증가액으로 나눈 값으로, 수요 1단위당 유발효과입니다. 생산유발 승수가 1보다 클수록 한 번의 수요 증가가 여러 산업으로 더 크게 퍼진다는 뜻입니다.</dd>
+<dt>최초 수요 · 1차 파급 · 2차 이후 파급</dt><dd>생산유발액을 단계별로 나눈 것입니다. <b>최초 수요</b>는 수요를 직접 받은 산업의 생산, <b>1차 파급</b>은 그 생산에 필요한 국산 중간재 투입(직접효과), <b>2차 이후 파급</b>은 그 투입을 만들기 위해 다시 필요한 투입이 꼬리를 물고 이어진 효과(간접효과)입니다. 세 값을 더하면 생산유발액이 됩니다.</dd>
 <dt>영향력계수</dt><dd>어떤 산업의 최종수요가 1단위 늘 때 전체 산업에 유발되는 생산을, 전 산업 평균과 비교한 값입니다. 1보다 크면 후방연쇄효과(다른 산업을 끌어올리는 힘)가 평균보다 큽니다.</dd>
 <dt>감응도계수</dt><dd>모든 산업의 최종수요가 각각 1단위씩 늘 때 그 산업에 유발되는 생산을, 전 산업 평균과 비교한 값입니다. 1보다 크면 전방연쇄효과(다른 산업의 수요 증가에 민감한 정도)가 평균보다 큽니다.</dd>
-<dt>단위</dt><dd>모든 금액은 <b>백만원</b>입니다. 1,000백만원은 10억원이고, 1,000,000백만원은 1조원입니다.</dd>
+<dt>단위</dt><dd>계산과 결과 표시는 <b>백만원</b> 기준입니다. 1,000백만원은 10억원이고, 1,000,000백만원은 1조원입니다. 입력할 때는 억원·조원도 고를 수 있습니다.</dd>
 </dl>
 <h3>해석할 때 유의할 점</h3>
 <ul>
