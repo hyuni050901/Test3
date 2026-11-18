@@ -4,12 +4,17 @@
 function showPage(pageId) {
   const pages = document.querySelectorAll('.page-view');
   pages.forEach(p => p.classList.remove('active'));
-  
+
   const target = document.getElementById(`page-${pageId}`);
   if (target) {
     target.classList.add('active');
   }
   window.scrollTo(0, 0);
+
+  // 기능 페이지로 들어가면 자료를 자동으로 불러온다 (이미 불러왔으면 무시)
+  if (pageId === 'explorer' || pageId === 'simulator') {
+    ensureDataLoaded();
+  }
 }
 
 // ==========================================
@@ -36,10 +41,17 @@ function setStatus(message, isError = false) {
   }
 }
 
+// 시뮬레이터 페이지: 자료가 없을 때 보여줄 안내 문구
+function renderSimulationPlaceholder(message) {
+  if (!simulationInputs) return;
+  simulationInputs.innerHTML =
+    `<p style="padding:15px; background:#f7fafc; border:1px dashed #cbd5e0; border-radius:6px;">${message}</p>`;
+}
+
 function initWorker() {
   // 캐시 방지(?v=timestamp) 적용
   worker = new Worker("worker.js?v=" + Date.now());
-  
+
   worker.onmessage = (e) => {
     const msg = e.data;
     if (msg.type === "status") {
@@ -53,20 +65,44 @@ function initWorker() {
     } else if (msg.type === "simulationResult") {
       renderSimulationResult(msg.payload);
     } else if (msg.type === "error") {
-      setStatus(msg.message, true);
+      handleLoadError(msg.message);
     }
+  };
+
+  worker.onerror = (e) => {
+    handleLoadError("워커 실행 오류: " + (e.message || "알 수 없는 오류"));
   };
 }
 
-if (loadBasicBtn) {
-  loadBasicBtn.addEventListener("click", () => {
-    if (!worker) {
-      initWorker();
+// 로딩 실패 시: 워커를 정리하고 다시 시도할 수 있게 한다
+function handleLoadError(message) {
+  setStatus(message, true);
+  if (!modelData) {
+    if (worker) {
+      worker.terminate();
+      worker = null;
     }
-    loadBasicBtn.disabled = true;
-    setStatus("Pyodide 및 엑셀 로딩 시작...");
-    worker.postMessage({ type: "init" });
-  });
+    if (loadBasicBtn) loadBasicBtn.disabled = false;
+    renderSimulationPlaceholder("자료 불러오기에 실패했습니다. 원자료 탐색 화면의 '기본부문 불러오기' 버튼으로 다시 시도하세요.");
+  }
+}
+
+// 자료 로딩 시작 (버튼 클릭과 자동 로딩이 공통으로 사용)
+function startLoading() {
+  if (modelData || worker) return; // 이미 불러왔거나 로딩 중
+  initWorker();
+  if (loadBasicBtn) loadBasicBtn.disabled = true;
+  setStatus("Pyodide 및 엑셀 로딩 시작...");
+  renderSimulationPlaceholder("자료를 불러오는 중입니다. 잠시만 기다려 주세요...");
+  worker.postMessage({ type: "init" });
+}
+
+function ensureDataLoaded() {
+  startLoading();
+}
+
+if (loadBasicBtn) {
+  loadBasicBtn.addEventListener("click", startLoading);
 }
 
 function enableExplorer() {
@@ -152,6 +188,11 @@ function enableSimulation() {
 
 function renderSimulationInputs() {
   if (!simulationInputs) return;
+  if (!modelData) {
+    renderSimulationPlaceholder("자료를 불러오는 중입니다. 잠시만 기다려 주세요...");
+    return;
+  }
+
   let html = `<div class="sim-row" style="background:white; padding:15px; border-radius:6px; border:1px solid #ddd;">
     <label><b>부문 선택: </b></label>
     <select id="sim-code-select" style="width:100%; padding:8px; margin:5px 0;">
@@ -188,7 +229,7 @@ function renderSimulationInputs() {
   });
 
   document.getElementById("run-sim-btn")?.addEventListener("click", () => {
-    if (activeRows.length === 0) return;
+    if (activeRows.length === 0 || !worker) return;
     setStatus("시뮬레이션 연산 중...");
     const shockDict = {};
     activeRows.forEach(item => {
@@ -205,7 +246,7 @@ function removeSimItem(idx) {
 
 function renderSimulationResult(res) {
   setStatus("시뮬레이션 완료");
-  
+
   if (simulationSummary) {
     let summaryHtml = `<h3 style="margin-top:20px;">요약 결과</h3>
     <table>
@@ -227,3 +268,6 @@ function renderSimulationResult(res) {
     simulationTop15.innerHTML = top15Html;
   }
 }
+
+// 처음부터 시뮬레이터 영역에 안내 문구를 채워 둔다 (빈 화면 방지)
+renderSimulationPlaceholder("메인 화면에서 시뮬레이터로 이동하면 자료를 자동으로 불러옵니다.");
