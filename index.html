@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 
-<html lang="ko"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>과제물1: 산업연관표분석 웹앱</title><link href="./style.css" rel="stylesheet"/><link href="./nav.css" rel="stylesheet"/><link href="./extra.css" rel="stylesheet"/><script defer="" src="./app.js"></script><script defer="" src="./nav.js"></script><script defer="" src="./extra.js"></script></head>
+<html lang="ko"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>과제물1: 산업연관표분석 웹앱</title><link href="./style.css" rel="stylesheet"/><link href="./nav.css" rel="stylesheet"/><link href="./extra.css" rel="stylesheet"/><link href="./linkage.css" rel="stylesheet"/><script defer="" src="./app.js"></script><script defer="" src="./nav.js"></script><script defer="" src="./extra.js"></script><script defer="" src="./linkage.js"></script></head>
 <body><header><p>2023 · 생산자가격 · 기본부문</p><h1>과제물1: 산업연관표분석 웹앱</h1><p>12개 원자료 시트 탐색과 380개 부문 수요충격 분석</p></header>
-<nav aria-label="주요 메뉴"><a href="#" data-page="main">홈으로</a><a href="#" data-page="explorer">원자료 탐색</a><a href="#" data-page="simulation">시뮬레이터</a><a href="#" data-page="compare">시나리오 비교</a><a href="#" data-page="guide">이용 안내</a></nav><main>
+<nav aria-label="주요 메뉴"><a href="#" data-page="main">홈으로</a><a href="#" data-page="explorer">원자료 탐색</a><a href="#" data-page="simulation">시뮬레이터</a><a href="#" data-page="compare">시나리오 비교</a><a href="#" data-page="linkage">영향력·감응도</a><a href="#" data-page="guide">이용 안내</a></nav><main>
 <aside aria-label="분석 준비 상태" class="loading-status"><p id="status" role="status">"기본부문 불러오기" 버튼을 눌러 자료를 불러오세요.</p><details><summary>계수 검증 결과</summary><pre id="validation">아직 자료를 불러오지 않았습니다.</pre></details></aside>
 
 <!-- PAGE 1: 메인 (기능 선택) -->
@@ -13,6 +13,7 @@
 <div class="menu-card"><h3>📊 원자료 탐색</h3><p>12개 원자료 시트와 380개 기본부문의 행/열 연결 구조를 확인합니다.</p><button type="button" data-page="explorer">원자료 탐색으로 이동</button></div>
 <div class="menu-card"><h3>🚀 수요충격 시뮬레이터</h3><p>최종수요 변화에 따른 생산·수입·부가가치 유발효과를 계산합니다.</p><button type="button" data-page="simulation">시뮬레이터로 이동</button></div>
 <div class="menu-card"><h3>⚖️ 시나리오 비교</h3><p>저장한 시나리오들의 유발효과를 표와 그래프로 나란히 비교합니다.</p><button type="button" data-page="compare">시나리오 비교로 이동</button></div>
+<div class="menu-card"><h3>🔗 영향력·감응도계수</h3><p>380개 산업의 전·후방 연쇄효과를 계산하고 산업 유형을 분류합니다.</p><button type="button" data-page="linkage">영향력·감응도로 이동</button></div>
 <div class="menu-card"><h3>📖 이용 안내</h3><p>사용 순서와 생산유발액·부가가치유발액 등 용어를 설명합니다.</p><button type="button" data-page="guide">이용 안내로 이동</button></div>
 </div>
 </div>
@@ -37,7 +38,34 @@
 <div id="compare-body"></div>
 </div>
 
-<!-- PAGE 5: 이용 안내 -->
+<!-- PAGE 5: 영향력계수·감응도계수 -->
+<div id="page-linkage" class="page-view">
+<p class="back-bar"><button type="button" data-page="main">← 메인 화면으로 돌아가기</button></p>
+<h2>4. 영향력계수 · 감응도계수</h2>
+<p>산업 간 연쇄효과를 보여주는 지표입니다. 380개 산업의 생산유발계수 행렬에서 계산하며, 전체 산업 평균을 1로 놓고 비교합니다.</p>
+<ul>
+<li><b>영향력계수 (후방연쇄)</b>: 어떤 산업의 최종수요가 늘 때 전체 산업의 생산을 얼마나 유발하는지를 나타냅니다. 1보다 크면 다른 산업에 미치는 파급력이 평균보다 큽니다.</li>
+<li><b>감응도계수 (전방연쇄)</b>: 모든 산업의 최종수요가 늘 때 그 산업이 얼마나 많은 생산을 요구받는지를 나타냅니다. 1보다 크면 다른 산업의 수요 증가에 평균보다 민감합니다.</li>
+</ul>
+<p id="link-status" role="status">이 화면으로 이동하면 자동으로 계산합니다.</p>
+<div id="link-body" hidden>
+<div class="xcards" id="link-cards"></div>
+<h3>산업 분포</h3>
+<div class="link-chart" id="link-chart"></div>
+<h3>산업별 계수</h3>
+<div class="link-controls">
+<label>유형<select id="link-type"><option value="all">전체</option><option value="both">전·후방 연쇄효과 모두 큼</option><option value="back">후방연쇄효과 큼</option><option value="fwd">전방연쇄효과 큼</option><option value="low">연쇄효과 작음</option></select></label>
+<label>산업 검색<input id="link-search" placeholder="산업 이름 또는 코드"/></label>
+<label>정렬<select id="link-sort"><option value="influence">영향력계수 높은 순</option><option value="sensitivity">감응도계수 높은 순</option><option value="code">산업 코드 순</option></select></label>
+<span id="link-count"></span>
+</div>
+<div class="scroll"><table class="xtable"><thead><tr><th>코드</th><th>산업</th><th>영향력계수</th><th>감응도계수</th><th>유형</th></tr></thead><tbody id="link-rows"></tbody></table></div>
+<p><button type="button" id="link-download">전체 CSV 다운로드</button></p>
+<p class="note">생산유발계수(국산 투입 기준) 행렬에서 영향력계수는 열합계, 감응도계수는 행합계를 전체 평균으로 나눈 값입니다. 두 계수 모두 380개 산업의 평균이 1입니다.</p>
+</div>
+</div>
+
+<!-- PAGE 6: 이용 안내 -->
 <div id="page-guide" class="page-view">
 <p class="back-bar"><button type="button" data-page="main">← 메인 화면으로 돌아가기</button></p>
 <h2>이용 안내</h2>
@@ -47,6 +75,7 @@
 <li><b>시뮬레이터</b>에서 산업과 최종수요 증가액(백만원)을 입력해 <b>시나리오에 추가</b>합니다. 여러 산업을 추가하면 증가액이 합산됩니다.</li>
 <li><b>파급효과 계산</b>을 누르면 생산·수입·부가가치 유발효과가 표와 그래프로 나옵니다.</li>
 <li>결과가 마음에 들면 <b>이 결과를 비교용으로 저장</b>을 눌러 <b>시나리오 비교</b>에서 다른 시나리오와 견줘 보세요.</li>
+<li><b>영향력·감응도</b>에서는 수요 입력 없이 산업 구조 자체의 연쇄효과를 볼 수 있습니다.</li>
 </ol>
 <h3>용어 설명</h3>
 <dl class="guide-terms">
@@ -55,6 +84,8 @@
 <dt>수입유발액</dt><dd>그 생산 과정에서 추가로 필요해지는 수입품의 금액입니다.</dd>
 <dt>부가가치유발액</dt><dd>생산 과정에서 새로 만들어지는 부가가치(임금, 영업이익 등)의 금액입니다.</dd>
 <dt>생산유발 승수</dt><dd>생산유발액을 최종수요 증가액으로 나눈 값입니다. 1보다 클수록 한 번의 수요 증가가 여러 산업으로 더 크게 퍼진다는 뜻입니다.</dd>
+<dt>영향력계수</dt><dd>어떤 산업의 최종수요가 1단위 늘 때 전체 산업에 유발되는 생산을, 전 산업 평균과 비교한 값입니다. 1보다 크면 후방연쇄효과(다른 산업을 끌어올리는 힘)가 평균보다 큽니다.</dd>
+<dt>감응도계수</dt><dd>모든 산업의 최종수요가 각각 1단위씩 늘 때 그 산업에 유발되는 생산을, 전 산업 평균과 비교한 값입니다. 1보다 크면 전방연쇄효과(다른 산업의 수요 증가에 민감한 정도)가 평균보다 큽니다.</dd>
 <dt>단위</dt><dd>모든 금액은 <b>백만원</b>입니다. 1,000백만원은 10억원이고, 1,000,000백만원은 1조원입니다.</dd>
 </dl>
 <h3>해석할 때 유의할 점</h3>
