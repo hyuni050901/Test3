@@ -21,3 +21,8 @@
 /* 이용 안내 */
 .guide-terms dt { font-weight: 700; margin-top: 12px; }
 .guide-terms dd { margin: 4px 0 0 0; }
+
+/* 시나리오 저장 / 예시 / 표 안의 버튼 */
+.save-bar input { display: inline-block; width: min(280px, 100%); margin: 0 8px 0 0; }
+.example-box { margin: 12px 0; }
+.xtable td button { padding: 4px 10px; margin: 0; font-size: .85rem; }
