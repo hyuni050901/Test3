@@ -1,4 +1,4 @@
-// extra.js - 결과 요약·승수·단계별 구성 / 시나리오 저장·비교 / 예시 시나리오 (샘플 app.js는 수정하지 않음)
+// extra.js - 결과 요약·승수·단계별 구성 / 상위 산업 차트 지표 전환 / 시나리오 저장·비교 / 예시 시나리오 (샘플 app.js는 수정하지 않음)
 (function () {
   'use strict';
   const $ = (id) => document.getElementById(id);
@@ -112,12 +112,32 @@
       '<ul class="xlegend">' + segs5.map((s) => `<li><i style="background:${s.color}"></i>${esc(s.name)} ${((s.val / total) * 100).toFixed(1)}%</li>`).join('') + '</ul>';
   }
 
+  // 상위 15개 산업 차트: 생산/수입/부가가치 중 선택한 지표로 다시 그린다
+  const METRIC_INFO = {
+    production: { label: '생산유발액', color: '#168179' },
+    imports: { label: '수입유발액', color: COLORS[1] },
+    valueAdded: { label: '부가가치유발액', color: COLORS[2] }
+  };
+  function renderTopBars(r) {
+    const sel = $('bars-metric'), bars = $('bars');
+    if (!sel || !bars || !r || !r.rows) return;
+    const k = METRIC_INFO[sel.value] ? sel.value : 'production';
+    const info = METRIC_INFO[k];
+    const title = $('bars-title');
+    if (title) title.textContent = info.label + ' 상위 15개 산업';
+    const top = r.rows.slice().sort((a, b) => b[k] - a[k]).slice(0, 15);
+    const max = Math.max(top.length ? top[0][k] : 0, 1e-12);
+    bars.innerHTML = top.map((x) =>
+      `<div class="bar">${esc(x.name)} · ${fmt(x[k])}백만원<div class="track"><div class="fill" style="width:${Math.max(0, (x[k] / max) * 100)}%;background:${info.color}"></div></div></div>`
+    ).join('');
+  }
+
   function watchResults() {
     const rows = $('result-rows');
     if (!rows) return;
     new MutationObserver(() => {
       const r = getResult();
-      if (r && r.rows) renderCharts(r);
+      if (r && r.rows) { renderCharts(r); renderTopBars(r); }
     }).observe(rows, { childList: true });
   }
 
@@ -250,4 +270,8 @@
   bindCompare();
   renderCompare();
   watchSectors();
+  if ($('bars-metric')) $('bars-metric').addEventListener('change', () => {
+    const r = getResult();
+    if (r && r.rows) renderTopBars(r);
+  });
 })();
