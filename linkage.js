@@ -66,11 +66,15 @@
       `<div class="xcard"><span class="dot" style="background:${TYPES[k].color}"></span><b>${TYPES[k].label}</b><strong>${counts[k]}개</strong><small>${TYPES[k].cond}</small></div>`
     ).join('');
 
-    drawChart();
-    refreshTable();
+    refreshTable();   // 표와 분포 그래프를 함께 그린다
   }
 
   function drawChart() {
+    const q = $('link-search').value.trim();
+    const hit = (r) => q && (r.code + ' ' + r.name).includes(q);
+    const hits = q ? data.filter(hit) : [];
+    const dim = hits.length > 0;
+
     const W = 640, H = 420, L = 52, R = 16, T = 16, B = 44;
     const xmax = Math.max(2, Math.max(...data.map((r) => r.influence)) * 1.05);
     const ymax = Math.max(2, Math.max(...data.map((r) => r.sensitivity)) * 1.05);
@@ -87,15 +91,24 @@
     g += `<line x1="${L}" y1="${T}" x2="${L}" y2="${H - B}" stroke="currentColor" opacity=".6"/>`;
     g += `<text x="${(L + W - R) / 2}" y="${H - 6}" text-anchor="middle" font-size="12" fill="currentColor">영향력계수 (후방연쇄)</text>`;
     g += `<text transform="translate(14 ${(T + H - B) / 2}) rotate(-90)" text-anchor="middle" font-size="12" fill="currentColor">감응도계수 (전방연쇄)</text>`;
-    data.forEach((r) => {
-      g += `<circle cx="${sx(r.influence).toFixed(1)}" cy="${sy(r.sensitivity).toFixed(1)}" r="3.5" fill="${TYPES[r.type].color}" fill-opacity=".75"><title>[${esc(r.code)}] ${esc(r.name)} · 영향력 ${f3(r.influence)} · 감응도 ${f3(r.sensitivity)}</title></circle>`;
-    });
+
+    const circle = (r, big) => `<circle cx="${sx(r.influence).toFixed(1)}" cy="${sy(r.sensitivity).toFixed(1)}" r="${big ? 6.5 : 3.5}" fill="${TYPES[r.type].color}" fill-opacity="${big ? 1 : dim ? 0.2 : 0.75}"${big ? ' stroke="currentColor" stroke-width="2"' : ''}><title>[${esc(r.code)}] ${esc(r.name)} · 영향력 ${f3(r.influence)} · 감응도 ${f3(r.sensitivity)}</title></circle>`;
+    data.forEach((r) => { if (!(dim && hit(r))) g += circle(r, false); });
+    hits.forEach((r) => { g += circle(r, true); });
+    if (hits.length && hits.length <= 6) {
+      hits.forEach((r) => {
+        const label = r.name.length > 14 ? r.name.slice(0, 14) + '…' : r.name;
+        g += `<text x="${(sx(r.influence) + 9).toFixed(1)}" y="${(sy(r.sensitivity) - 8).toFixed(1)}" font-size="11" fill="currentColor" font-weight="700">${esc(label)}</text>`;
+      });
+    }
+
     $('link-chart').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="산업별 영향력계수와 감응도계수 분포">${g}</svg>` +
-      '<p class="note">점 하나가 산업 하나입니다. 점에 마우스를 올리면 산업명이 보입니다. 점선은 기준값 1입니다.</p>';
+      '<p class="note">점 하나가 산업 하나입니다. 점에 마우스를 올리면 산업명이 보입니다. 점선은 기준값 1입니다. 아래 "산업 검색"에 입력하면 해당 산업이 강조됩니다.</p>';
   }
 
   function refreshTable() {
     if (!data) return;
+    drawChart();
     const type = $('link-type').value;
     const q = $('link-search').value.trim();
     const sort = $('link-sort').value;
@@ -103,8 +116,19 @@
     rows.sort((a, b) => sort === 'sensitivity' ? b.sensitivity - a.sensitivity : sort === 'code' ? a.code.localeCompare(b.code) : b.influence - a.influence);
     $('link-count').textContent = rows.length + '개 산업';
     $('link-rows').innerHTML = rows.map((r) =>
-      `<tr><td>${esc(r.code)}</td><td>${esc(r.name)}</td><td>${f3(r.influence)}</td><td>${f3(r.sensitivity)}</td><td style="text-align:left"><span class="dot" style="background:${TYPES[r.type].color}"></span>${TYPES[r.type].label}</td></tr>`
+      `<tr><td>${esc(r.code)}</td><td>${esc(r.name)}</td><td>${f3(r.influence)}</td><td>${f3(r.sensitivity)}</td><td style="text-align:left"><span class="dot" style="background:${TYPES[r.type].color}"></span>${TYPES[r.type].label}</td><td style="text-align:center"><button type="button" data-sim="${esc(r.code)}">시뮬레이션</button></td></tr>`
     ).join('');
+  }
+
+  // 표의 "시뮬레이션" 버튼: 시뮬레이터로 이동해 해당 산업을 미리 선택해 둔다
+  function goSimulate(code) {
+    if (window.showPage) window.showPage('simulation');
+    const search = $('sector-search');
+    if (search) { search.value = ''; search.dispatchEvent(new Event('input')); }
+    const sel = $('sector');
+    if (sel) sel.value = code;
+    const amt = $('amount');
+    if (amt) amt.focus();
   }
 
   const csvCell = (v) => { let s = String(v); if (/^[=+@-]/.test(s) && typeof v !== 'number') s = "'" + s; return '"' + s.replaceAll('"', '""') + '"'; };
@@ -125,4 +149,8 @@
   ['link-type', 'link-sort'].forEach((id) => { const el = $(id); if (el) el.addEventListener('change', refreshTable); });
   if ($('link-search')) $('link-search').addEventListener('input', refreshTable);
   if ($('link-download')) $('link-download').addEventListener('click', download);
+  if ($('link-rows')) $('link-rows').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-sim]');
+    if (b) goSimulate(b.getAttribute('data-sim'));
+  });
 })();
