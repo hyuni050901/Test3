@@ -1,0 +1,14 @@
+/* ① 직접·간접 효과 분해: 누적 막대 */
+.xbar-track.stack { display: flex; }
+.xbar-track.stack .xbar-fill { flex: none; border-radius: 0; }
+.vbars .xbar-label { flex-basis: 13em; font-size: .9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ② 유발계수 지도: 색상 범례 */
+.grad-legend { display: flex; align-items: center; gap: 8px; font-size: .85em; margin: 6px 0; }
+.grad-legend i { display: block; flex: 0 0 120px; height: 10px; border-radius: 5px; background: linear-gradient(90deg, rgb(43,108,176), rgb(197,48,48)); }
+
+/* ③ 예시 시나리오 버튼 */
+.preset-box { margin: 12px 0; padding: 12px 14px; border: 1px dashed rgba(128,128,128,.5); border-radius: 8px; }
+.preset-buttons { display: inline-flex; flex-wrap: wrap; gap: 8px; margin-left: 8px; }
+.preset-buttons button { cursor: pointer; }
+.preset-buttons button:disabled { cursor: not-allowed; }
