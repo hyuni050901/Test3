@@ -1,14 +1,16 @@
-// more2.js - ① 파급 단계 분석 ② 산업 프로필 (새 페이지) ③ 유발계수 지도에 목표 역산 계산기·행렬 히트맵 추가
+// more2.js - ① 파급 단계 분석 ② 산업 프로필 (새 페이지) ③ 유발계수 지도에 산업 선택 + 목표 역산 계산기 + 행렬 히트맵 추가
 (function () {
   'use strict';
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const f3 = (x) => Number(x).toFixed(3);
   const fmt0 = (x) => Number(x).toLocaleString('ko-KR', { maximumFractionDigits: 0 });
+  const short = (s) => (s.length > 9 ? s.slice(0, 9) + '…' : s);
   const secs = () => { try { return typeof sectors !== 'undefined' ? sectors : []; } catch (e) { return []; } };
+  const MAXPICK = 20;
 
   const style = document.createElement('style');
-  style.textContent = '.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}.pgrid ol{padding-left:1.3em;margin:4px 0}.xbar-value.wide{flex-basis:17em}#hm-canvas{width:100%;max-width:760px;image-rendering:pixelated;display:block;border:1px solid rgba(128,128,128,.4)}.sub-section{margin-top:32px;padding-top:16px;border-top:2px solid rgba(128,128,128,.3)}';
+  style.textContent = '.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}.pgrid ol{padding-left:1.3em;margin:4px 0}.xbar-value.wide{flex-basis:17em}#hm-canvas{width:100%;max-width:760px;image-rendering:pixelated;display:block;border:1px solid rgba(128,128,128,.4)}.sub-section{margin-top:32px;padding-top:16px;border-top:2px solid rgba(128,128,128,.3)}.chip{display:inline-flex;align-items:center;gap:4px;margin:4px 6px 4px 0;padding:2px 4px 2px 10px;border:1px solid rgba(128,128,128,.5);border-radius:14px;font-size:.9em}.chip button{margin:0;padding:0 8px;background:transparent;color:inherit;font-size:1.1em}';
   document.head.append(style);
 
   function waitReady() {
@@ -115,18 +117,36 @@
   }
 
   // ======================= ③ 유발계수 지도 페이지에 추가 =======================
+  const pick = [];   // 공용 산업 선택 목록 (산업 코드)
   const map = $('page-map');
   if (map) {
     const box = document.createElement('div');
     box.innerHTML =
+      '<div class="sub-section"><h2>산업 선택 (목표 역산 · 히트맵 공용)</h2><p>비교하고 싶은 산업을 담으세요(최대 ' + MAXPICK + '개). 아무것도 담지 않으면 전체 산업 기준으로 보여주고, 담으면 담은 산업만 보여줍니다. 히트맵은 2개 이상 담으면 이름과 숫자가 붙은 작은 행렬로 바뀝니다.</p>' +
+      '<div class="link-controls">' + picker('pk', '산업') + '<button type="button" id="pk-add">추가</button><button type="button" id="pk-clear">모두 비우기</button></div>' +
+      '<p id="pk-status" role="status"></p><div id="pk-chips"></div></div>' +
       '<div class="sub-section"><h2>목표 역산 계산기</h2><p>거꾸로 계산합니다. 달성하고 싶은 유발액을 입력하면, 산업별로 <b>최종수요가 얼마나 필요한지</b> 적은 순으로 보여줍니다. 필요한 수요가 작을수록 효율이 높은 산업입니다.</p>' +
       '<div class="link-controls"><label>목표 지표<select id="gl-metric"><option value="valueAdded">부가가치유발액</option><option value="production">생산유발액</option></select></label>' +
       '<label>목표 금액 (백만원)<input id="gl-target" type="number" value="1000000" min="1"></label><button type="button" id="gl-run">역산하기</button></div>' +
       '<p id="gl-status" role="status"></p><div id="gl-out"></div></div>' +
-      '<div class="sub-section"><h2>생산유발계수 행렬 히트맵</h2><p>380×380 생산유발계수 행렬을 색으로 봅니다. 열 산업의 수요가 1단위 늘 때 행 산업의 생산이 얼마나 느는지를 나타냅니다. 색이 짙을수록 값이 크고(로그 눈금), 대각선은 자기 산업 효과라 가장 짙습니다.</p>' +
+      '<div class="sub-section"><h2>생산유발계수 행렬 히트맵</h2><p>생산유발계수 행렬을 색으로 봅니다. 열 산업의 수요가 1단위 늘 때 행 산업의 생산이 얼마나 느는지를 나타냅니다. 색이 짙을수록 값이 크고(로그 눈금), 대각선은 자기 산업 효과라 가장 짙습니다.</p>' +
       '<div class="link-controls"><label>정렬<select id="hm-sort"><option value="code">산업 코드 순</option><option value="sum">영향력(열합계) 큰 순</option></select></label><button type="button" id="hm-run">히트맵 그리기</button></div>' +
-      '<p id="hm-status" role="status"></p><canvas id="hm-canvas" width="380" height="380" hidden></canvas><p id="hm-info" class="note" role="status">히트맵 위에 마우스를 올리면 값이 보입니다.</p></div>';
+      '<p id="hm-status" role="status"></p><div id="hm-small"></div><canvas id="hm-canvas" width="380" height="380" hidden></canvas><p id="hm-info" class="note" role="status">전체 히트맵 위에 마우스를 올리면 값이 보입니다.</p></div>';
     map.append(box);
+  }
+
+  function renderChips() {
+    const names = new Map(secs().map((s) => [s.code, s.name]));
+    $('pk-chips').innerHTML = pick.length
+      ? pick.map((c) => `<span class="chip">${esc(c + ' ' + (names.get(c) || ''))}<button type="button" data-rm="${esc(c)}" aria-label="삭제">×</button></span>`).join('')
+      : '<p class="note">담은 산업이 없습니다. (전체 산업 기준으로 표시)</p>';
+  }
+  function addPick() {
+    const code = $('pk').value;
+    if (!code) { say('pk-status', '먼저 자료가 불러와진 뒤 산업을 고르세요.', true); return; }
+    if (pick.includes(code)) { say('pk-status', '이미 담은 산업입니다.', true); return; }
+    if (pick.length >= MAXPICK) { say('pk-status', '최대 ' + MAXPICK + '개까지 담을 수 있습니다.', true); return; }
+    pick.push(code); say('pk-status', ''); renderChips();
   }
 
   async function runGoal() {
@@ -136,40 +156,67 @@
     try {
       await ensure();
       const r = await call('coeff', null);
-      const rows = r.rows.filter((x) => x[metric] > 1e-9).map((x) => ({ code: x.code, name: x.name, need: T / x[metric], imp: T / x[metric] * x.imports, prod: T / x[metric] * x.production }));
+      let rows = r.rows.filter((x) => x[metric] > 1e-9).map((x) => ({ code: x.code, name: x.name, need: T / x[metric], imp: T / x[metric] * x.imports, prod: T / x[metric] * x.production }));
       rows.sort((a, b) => a.need - b.need);
-      const top = rows.slice(0, 15), max = top[top.length - 1].need || 1, lab = metric === 'valueAdded' ? '부가가치' : '생산';
-      $('gl-out').innerHTML = `<h3>${lab}유발액 ${fmt0(T)}백만원을 만들기 위한 필요 최종수요 (적은 순 15개)</h3>` +
+      const chosen = pick.length > 0;
+      if (chosen) rows = rows.filter((x) => pick.includes(x.code));
+      if (!rows.length) { say('gl-status', '선택한 산업의 계수를 구할 수 없습니다.', true); return; }
+      const top = chosen ? rows : rows.slice(0, 15), max = top[top.length - 1].need || 1, lab = metric === 'valueAdded' ? '부가가치' : '생산';
+      const title = chosen ? `선택한 ${rows.length}개 산업 (필요 수요 적은 순)` : '전체 산업 중 필요 수요가 적은 15개';
+      $('gl-out').innerHTML = `<h3>${lab}유발액 ${fmt0(T)}백만원을 만들기 위한 필요 최종수요 — ${title}</h3>` +
         top.map((x) => `<div class="xbar"><span class="xbar-label" style="flex-basis:13em">${esc(x.name)}</span><span class="xbar-track"><span class="xbar-fill" style="width:${x.need / max * 100}%;background:#2f855a"></span></span><span class="xbar-value wide">${fmt0(x.need)} (수입유발 ${fmt0(x.imp)})</span></div>`).join('') +
         '<div class="scroll"><table class="xtable"><thead><tr><th>순위</th><th>산업</th><th>필요 수요</th><th>생산유발액</th><th>수입유발액</th></tr></thead><tbody>' +
         rows.slice(0, 50).map((x, i) => `<tr><td>${i + 1}</td><td>${esc(x.code + ' ' + x.name)}</td><td>${fmt0(x.need)}</td><td>${fmt0(x.prod)}</td><td>${fmt0(x.imp)}</td></tr>`).join('') +
-        '</tbody></table></div><p class="note">필요 수요 = 목표 금액 ÷ 해당 유발계수 (단위: 백만원). 표에는 상위 50개만 표시합니다. 선형 모형의 기준 추정치이며 산업별 공급 능력은 반영하지 않습니다.</p>';
+        '</tbody></table></div><p class="note">필요 수요 = 목표 금액 ÷ 해당 유발계수 (단위: 백만원). 순위는 ' + (chosen ? '선택한 산업 안에서의' : '전체 산업 중') + ' 순위이고 표에는 최대 50개를 표시합니다. 선형 모형의 기준 추정치이며 산업별 공급 능력은 반영하지 않습니다.</p>';
       say('gl-status', '');
     } catch (e) { say('gl-status', '계산 실패: ' + e.message, true); }
   }
 
   let hm = null, ord = [];
+  const heatColor = (v) => {
+    const t = v > 0 ? Math.min(1, Math.max(0, (Math.log10(Math.max(v, 1e-5)) + 5) / 5.3)) : 0;
+    return { t, rgb: [255 - t * 225, 255 - t * 165, 255 - t * 80] };
+  };
+  function renderSmall(idx) {
+    const head = idx.map((j) => `<th title="${esc(hm.codes[j] + ' ' + hm.names[j])}">${esc(short(hm.names[j]))}</th>`).join('');
+    const body = idx.map((i) => `<tr><th scope="row" title="${esc(hm.codes[i] + ' ' + hm.names[i])}">${esc(short(hm.names[i]))}</th>` + idx.map((j) => {
+      const v = hm.m[i][j], c = heatColor(v);
+      return `<td style="text-align:center;background:rgb(${c.rgb.map(Math.round).join(',')});color:${c.t > 0.6 ? '#fff' : 'inherit'}" title="${esc(hm.names[j] + ' 수요 → ' + hm.names[i] + ' 생산')}">${f3(v)}</td>`;
+    }).join('') + '</tr>').join('');
+    $('hm-small').innerHTML = `<div class="scroll"><table class="xtable"><thead><tr><th>행: 생산이 느는 산업 ↓<br>열: 수요가 느는 산업 →</th>${head}</tr></thead><tbody>${body}</tbody></table></div>` +
+      '<p class="note">칸의 숫자는 열 산업의 최종수요가 1단위 늘 때 행 산업의 생산이 늘어나는 양입니다. 대각선은 자기 산업의 효과입니다. 칸에 마우스를 올리면 전체 이름이 보입니다.</p>';
+  }
   async function drawHeat() {
     say('hm-status', '행렬 계산 중…');
     try {
       await ensure();
       if (!hm) hm = await call('matrix', null);
-      const n = hm.codes.length;
+      const n = hm.codes.length, bySum = $('hm-sort').value === 'sum';
+      const cs = bySum ? [...Array(n).keys()].map((j) => hm.m.reduce((a, r) => a + r[j], 0)) : null;
+      const cv = $('hm-canvas');
+      if (pick.length >= 2) {
+        const idx = pick.map((c) => hm.codes.indexOf(c)).filter((i) => i >= 0);
+        idx.sort(bySum ? (a, b) => cs[b] - cs[a] : (a, b) => hm.codes[a].localeCompare(hm.codes[b]));
+        cv.hidden = true; renderSmall(idx);
+        $('hm-info').textContent = '선택한 ' + idx.length + '개 산업의 행렬입니다. 전체 히트맵을 보려면 선택 목록을 비우고 다시 그리세요.';
+        say('hm-status', ''); return;
+      }
+      $('hm-small').innerHTML = '';
       ord = [...Array(n).keys()];
-      if ($('hm-sort').value === 'sum') { const cs = ord.map((j) => hm.m.reduce((a, r) => a + r[j], 0)); ord.sort((a, b) => cs[b] - cs[a]); }
-      const cv = $('hm-canvas'), ctx = cv.getContext('2d'), img = ctx.createImageData(n, n);
+      if (bySum) ord.sort((a, b) => cs[b] - cs[a]);
+      const ctx = cv.getContext('2d'), img = ctx.createImageData(n, n);
       for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-        const v = hm.m[ord[y]][ord[x]];
-        const t = v > 0 ? Math.min(1, Math.max(0, (Math.log10(Math.max(v, 1e-5)) + 5) / 5.3)) : 0, p = (y * n + x) * 4;
-        img.data[p] = 255 - t * 225; img.data[p + 1] = 255 - t * 165; img.data[p + 2] = 255 - t * 80; img.data[p + 3] = 255;
+        const c = heatColor(hm.m[ord[y]][ord[x]]).rgb, p = (y * n + x) * 4;
+        img.data[p] = c[0]; img.data[p + 1] = c[1]; img.data[p + 2] = c[2]; img.data[p + 3] = 255;
       }
       ctx.putImageData(img, 0, 0);
       cv.hidden = false;
+      $('hm-info').textContent = '히트맵 위에 마우스를 올리면 값이 보입니다. (산업을 2개 이상 담으면 선택한 산업만 크게 볼 수 있습니다.)';
       say('hm-status', '');
     } catch (e) { say('hm-status', '계산 실패: ' + e.message, true); }
   }
   function heatHover(e) {
-    if (!hm) return;
+    if (!hm || $('hm-canvas').hidden) return;
     const cv = $('hm-canvas'), r = cv.getBoundingClientRect(), n = hm.codes.length;
     const x = Math.floor((e.clientX - r.left) / r.width * n), y = Math.floor((e.clientY - r.top) / r.height * n);
     if (x < 0 || y < 0 || x >= n || y >= n) return;
@@ -183,15 +230,26 @@
     if (inited) return;
     try { await ensure(); } catch (e) { return; }
     inited = true;
-    [['sg-sec', false], ['pf-a', false], ['pf-b', true]].forEach(([id, none]) => { fillPicker(id, none); bindPicker(id, none); });
+    [['sg-sec', false], ['pf-a', false], ['pf-b', true], ['pk', false]].forEach(([id, none]) => { fillPicker(id, none); bindPicker(id, none); });
+    renderChips();
   }
   document.addEventListener('click', (e) => {
     const el = e.target.closest('[data-page]');
-    if (el && ['stages', 'profile'].includes(el.getAttribute('data-page'))) initPickers();
+    if (el && ['stages', 'profile', 'map'].includes(el.getAttribute('data-page'))) initPickers();
   });
   $('sg-run').addEventListener('click', runStages);
   $('pf-run').addEventListener('click', runProfile);
   $('gl-run').addEventListener('click', runGoal);
   $('hm-run').addEventListener('click', drawHeat);
   $('hm-canvas').addEventListener('mousemove', heatHover);
+  $('pk-add').addEventListener('click', addPick);
+  $('pk-clear').addEventListener('click', () => { pick.length = 0; renderChips(); });
+  $('pk-chips').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-rm]');
+    if (!b) return;
+    const i = pick.indexOf(b.getAttribute('data-rm'));
+    if (i >= 0) pick.splice(i, 1);
+    renderChips();
+  });
+  renderChips();
 })();
