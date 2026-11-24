@@ -33,19 +33,26 @@
   }
   const bindPicker = (id, none) => $(id + '-q').addEventListener('input', () => fillPicker(id, none));
 
-  // ---------- 페이지/메뉴 삽입 ----------
+  // ---------- 페이지/메뉴 삽입 (이용 안내 앞에 끼워 넣기) ----------
   function addPage(id, title, desc, html, menuIcon, menuText) {
     const d = document.createElement('div');
     d.id = 'page-' + id; d.className = 'page-view';
     d.innerHTML = `<p class="back-bar"><button type="button" data-page="main">← 메인 화면으로 돌아가기</button></p><h2>${title}</h2>${html}`;
     document.querySelector('main').append(d);
+
+    const nav = document.querySelector('nav');
     const a = document.createElement('a');
     a.href = '#'; a.setAttribute('data-page', id); a.textContent = menuText;
-    document.querySelector('nav').append(a);
+    const guideLink = nav.querySelector('a[data-page="guide"]');
+    if (guideLink) nav.insertBefore(a, guideLink); else nav.append(a);
+
+    const cards = document.querySelector('.menu-cards');
     const c = document.createElement('div');
     c.className = 'menu-card';
     c.innerHTML = `<h3>${menuIcon} ${menuText}</h3><p>${desc}</p><button type="button" data-page="${id}">${menuText}(으)로 이동</button>`;
-    document.querySelector('.menu-cards').append(c);
+    const guideBtn = cards.querySelector('[data-page="guide"]');
+    const guideCard = guideBtn ? guideBtn.closest('.menu-card') : null;
+    if (guideCard) cards.insertBefore(c, guideCard); else cards.append(c);
   }
 
   // ======================= ① 파급 단계 분석 =======================
