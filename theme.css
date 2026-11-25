@@ -1,0 +1,120 @@
+/* theme.css - 리포트형 테마: 아이보리 종이 + 명조 제목 + 버밀리언 포인트 1색
+   되돌리려면 index.html에서 이 파일을 불러오는 줄만 지우면 됩니다. */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@500;700;900&display=swap');
+
+:root {
+  --paper: #faf6ee;
+  --paper2: #f1e9d8;
+  --sheet: #fffdf8;
+  --ink: #26211b;
+  --muted: #6f655a;
+  --rule: #d9cfbc;
+  --accent: #c8402a;
+  --accent-dark: #9e2f1d;
+  --serif: 'Noto Serif KR', 'Nanum Myeongjo', 'Batang', serif;
+  --sans: 'Noto Sans KR', 'Pretendard', system-ui, -apple-system, 'Malgun Gothic', sans-serif;
+}
+
+::selection { background: var(--accent); color: #fff; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.8; }
+a { color: var(--accent-dark); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+/* 머리말 */
+header {
+  background: transparent; color: var(--ink);
+  padding: 52px max(24px, calc((100vw - 1080px) / 2)) 24px;
+  border-bottom: 4px double var(--ink);
+}
+header p:first-child { margin: 0; font-size: .8rem; font-weight: 700; letter-spacing: .2em; color: var(--accent); }
+header h1 { font-family: var(--serif); font-weight: 900; letter-spacing: -.03em; line-height: 1.25; margin: 10px 0 8px; }
+header p:last-child { margin: 0; color: var(--muted); }
+
+/* 메뉴 */
+nav {
+  position: sticky; top: 0; z-index: 10;
+  background: var(--paper); border-bottom: 1px solid var(--rule);
+  padding: 0 max(24px, calc((100vw - 1080px) / 2)); gap: 4px 26px;
+}
+nav a { color: var(--ink); text-decoration: none; font-weight: 500; font-size: .95rem; padding: 14px 0 12px; border-bottom: 2px solid transparent; }
+nav a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* 본문 구획: 상자 대신 위쪽 굵은 선 */
+main { padding-top: 32px; }
+section { background: var(--sheet); border: 1px solid var(--rule); border-top: 3px solid var(--ink); border-radius: 2px; box-shadow: none; }
+main .sub-section { border-top: 4px double var(--ink); }
+h2, h3, h4 { font-family: var(--serif); font-weight: 700; letter-spacing: -.01em; }
+h2 { font-size: 1.7rem; }
+.page-view > h2 { padding-bottom: 10px; border-bottom: 1px solid var(--rule); }
+h3 { font-size: 1.25rem; margin-top: 1.6em; }
+.note { color: var(--muted); }
+
+/* 상태 박스 */
+.loading-status { background: var(--sheet); border: 1px solid var(--rule); border-left: 4px solid var(--accent); border-radius: 2px; }
+#status { background: transparent; color: var(--ink); }
+.loading-status details { color: var(--muted); }
+pre { background: var(--paper2); border-radius: 2px; }
+
+/* 입력 */
+label { font-weight: 500; font-size: .93rem; }
+input, select { background: var(--sheet); color: var(--ink); border: 1px solid #b9ad97; border-radius: 2px; }
+input:focus, select:focus { border-color: var(--accent); }
+
+/* 버튼 */
+button { background: var(--ink); color: var(--paper); border-radius: 2px; font-weight: 500; letter-spacing: .02em; }
+button:hover:not(:disabled) { background: var(--accent); }
+button:disabled { opacity: .45; }
+.load-bar button { background: var(--accent); padding: 12px 24px; }
+.load-bar button:hover:not(:disabled) { background: var(--ink); }
+.back-bar button { background: transparent; color: var(--ink); border: 1px solid var(--ink); }
+.back-bar button:hover:not(:disabled) { background: var(--ink); color: var(--paper); }
+.chip { border-color: var(--rule); border-radius: 2px; background: var(--sheet); }
+.chip button, .chip button:hover:not(:disabled) { background: transparent; color: var(--ink); }
+.chip button:hover:not(:disabled) { color: var(--accent); }
+.xtable td button { padding: 3px 10px; }
+
+/* 홈 메뉴 카드 */
+.menu-card { background: var(--sheet); border: 1px solid var(--rule); border-top: 3px solid var(--ink); border-radius: 2px; transition: border-color .15s, transform .15s; }
+.menu-card:hover { border-color: var(--accent); border-top-color: var(--accent); transform: translateY(-2px); }
+.menu-card h3 { margin-top: 0; }
+
+/* 숫자 카드 */
+.card, .xcard { background: var(--sheet); border: 1px solid var(--rule); border-radius: 2px; }
+.card { background: var(--paper2); }
+.card strong, .xcard strong { font-family: var(--serif); font-weight: 900; color: var(--accent-dark); }
+.xcard small { color: var(--muted); opacity: 1; }
+.preset-box { border: 1px dashed #b9ad97; border-radius: 2px; background: var(--sheet); }
+
+/* 막대 */
+.track, .xbar-track, .xstack { background: #e7dcc5; border-radius: 1px; }
+.fill, .xbar-fill, .xbar-track, .track { border-radius: 1px; }
+.fill { background: var(--accent); }
+
+/* 표 */
+table { font-size: .93rem; }
+th, td { border-bottom: 1px solid var(--rule); }
+thead { background: var(--paper2); }
+th { font-weight: 700; font-size: .88rem; color: var(--ink); }
+caption { color: var(--muted); font-size: .9rem; }
+.xtable th, .xtable td { border: 1px solid var(--rule); }
+.xtable thead th { background: var(--paper2); }
+.xtable td.best { color: var(--accent-dark); }
+.scroll { border: 1px solid var(--rule); border-radius: 2px; }
+#hm-canvas { border-color: var(--rule); }
+#pk-list { border-color: var(--rule); background: var(--sheet); border-radius: 2px; }
+
+/* 맺음말 */
+footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--rule); max-width: 1120px; margin: 0 auto; }
+
+@media (max-width: 600px) {
+  header { padding-top: 32px; }
+  nav { gap: 2px 16px; }
+  nav a { font-size: .88rem; padding: 10px 0 8px; }
+  h2 { font-size: 1.4rem; }
+}
+
+@media print {
+  nav, .back-bar, .loading-status, button, .link-controls { display: none !important; }
+  body { background: #fff; }
+  section, .menu-card, .card, .xcard { break-inside: avoid; }
+}
