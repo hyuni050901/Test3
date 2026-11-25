@@ -177,3 +177,6 @@ th { color: var(--ink); }
 .xtable td.best { color: var(--accent-dark); }
 .fill { background: var(--accent); }
 input:focus, select:focus { border-color: var(--accent); }
+
+/* ===== 안내 박스: 상단 띠와 같은 색 ===== */
+.loading-status { background: var(--band); border: 1px solid #ddd2b6; box-shadow: none; }
