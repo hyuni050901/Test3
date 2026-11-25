@@ -184,3 +184,6 @@ input:focus, select:focus { border-color: var(--accent); }
 /* ===== 기본부문 불러오기 버튼: 연한 초록 ===== */
 .load-bar button { background: #35936a; color: #fff; }
 .load-bar button:hover:not(:disabled) { background: var(--accent); }
+
+/* ===== 안내 박스 왼쪽 끝 띠: 연한 초록 ===== */
+.loading-status { border-left: 6px solid #35936a; }
