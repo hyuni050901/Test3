@@ -122,3 +122,20 @@ footer { color: var(--muted); font-size: .85rem; }
   body { background: #fff; }
   section, .menu-card, .card, .xcard { break-inside: avoid; box-shadow: none; }
 }
+
+/* ===== 상단 영역(제목 + 메뉴) 색을 진하게 해서 경계 만들기 ===== */
+header {
+  background: #eadfc8;
+}
+header p:first-child {
+  background: rgba(255, 255, 255, .6);
+}
+nav {
+  background: #eadfc8;
+  backdrop-filter: none;
+  border-bottom: 1px solid #d3c3a4;
+  box-shadow: 0 6px 14px rgba(60, 45, 25, .08);
+}
+nav a:hover {
+  background: rgba(255, 255, 255, .6);
+}
