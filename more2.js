@@ -7,7 +7,7 @@
   const fmt0 = (x) => Number(x).toLocaleString('ko-KR', { maximumFractionDigits: 0 });
   const short = (s) => (s.length > 9 ? s.slice(0, 9) + '…' : s);
   const secs = () => { try { return typeof sectors !== 'undefined' ? sectors : []; } catch (e) { return []; } };
-  const MAXPICK = 20;
+  const SMALL = 30;   // 선택 산업이 이 개수 이하면 숫자 표, 초과하면 색 그림
 
   const style = document.createElement('style');
   style.textContent = '.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}.pgrid ol{padding-left:1.3em;margin:4px 0}.xbar-value.wide{flex-basis:17em}#hm-canvas{width:100%;max-width:760px;image-rendering:pixelated;display:block;border:1px solid rgba(128,128,128,.4)}.sub-section{margin-top:32px;padding-top:16px;border-top:2px solid rgba(128,128,128,.3)}.chip{display:inline-flex;align-items:center;gap:4px;margin:4px 6px 4px 0;padding:2px 4px 2px 10px;border:1px solid rgba(128,128,128,.5);border-radius:14px;font-size:.9em}.chip button{margin:0;padding:0 8px;background:transparent;color:inherit;font-size:1.1em}#pk-list{max-height:320px;overflow:auto;border:1px solid rgba(128,128,128,.4);border-radius:8px;padding:8px 12px;margin:8px 0}#pk-list[hidden]{display:none}.pk-item{display:flex;align-items:center;gap:8px;margin:2px 0;font-weight:400;cursor:pointer}.pk-item input{width:auto;margin:0;display:inline-block}';
@@ -122,8 +122,8 @@
   if (map) {
     const box = document.createElement('div');
     box.innerHTML =
-      '<div class="sub-section"><h2>산업 선택 (목표 역산 · 히트맵 공용)</h2><p>비교하고 싶은 산업을 담으세요(최대 ' + MAXPICK + '개). 아무것도 담지 않으면 전체 산업 기준으로 보여주고, 담으면 담은 산업만 보여줍니다. 히트맵은 2개 이상 담으면 이름과 숫자가 붙은 작은 행렬로 바뀝니다.</p>' +
-      '<div class="link-controls">' + picker('pk', '산업') + '<button type="button" id="pk-add">추가</button><button type="button" id="pk-all">전체 산업 목록 보기</button><button type="button" id="pk-clear">모두 비우기</button></div>' +
+      '<div class="sub-section"><h2>산업 선택 (목표 역산 · 히트맵 공용)</h2><p>비교하고 싶은 산업을 담으세요. <b>전체 선택</b>을 누르면 모든 산업(검색칸에 입력했다면 검색 결과 전체)을 한 번에 담습니다. 아무것도 담지 않으면 전체 산업 기준으로 보여주고, 담으면 담은 산업만 보여줍니다. 히트맵은 ' + SMALL + '개 이하면 이름과 숫자가 붙은 표로, 그보다 많으면 색 그림으로 보여줍니다.</p>' +
+      '<div class="link-controls">' + picker('pk', '산업') + '<button type="button" id="pk-add">추가</button><button type="button" id="pk-every">전체 선택</button><button type="button" id="pk-all">전체 산업 목록 보기</button><button type="button" id="pk-clear">모두 비우기</button></div>' +
       '<div id="pk-list" hidden></div>' +
       '<p id="pk-status" role="status"></p><div id="pk-chips"></div></div>' +
       '<div class="sub-section"><h2>목표 역산 계산기</h2><p>거꾸로 계산합니다. 달성하고 싶은 유발액을 입력하면, 산업별로 <b>최종수요가 얼마나 필요한지</b> 적은 순으로 보여줍니다. 필요한 수요가 작을수록 효율이 높은 산업입니다.</p>' +
@@ -138,7 +138,9 @@
 
   function renderChips() {
     const names = new Map(secs().map((s) => [s.code, s.name]));
-    $('pk-chips').innerHTML = pick.length
+    $('pk-chips').innerHTML = pick.length > SMALL
+      ? '<p class="note"><b>' + pick.length + '개 산업</b>을 담았습니다. 목록이 길어 이름은 생략합니다. "전체 산업 목록 보기"에서 확인할 수 있습니다.</p>'
+      : pick.length
       ? pick.map((c) => `<span class="chip">${esc(c + ' ' + (names.get(c) || ''))}<button type="button" data-rm="${esc(c)}" aria-label="삭제">×</button></span>`).join('')
       : '<p class="note">담은 산업이 없습니다. (전체 산업 기준으로 표시)</p>';
   }
@@ -160,8 +162,15 @@
     const code = $('pk').value;
     if (!code) { say('pk-status', '먼저 자료가 불러와진 뒤 산업을 고르세요.', true); return; }
     if (pick.includes(code)) { say('pk-status', '이미 담은 산업입니다.', true); return; }
-    if (pick.length >= MAXPICK) { say('pk-status', '최대 ' + MAXPICK + '개까지 담을 수 있습니다.', true); return; }
     pick.push(code); say('pk-status', ''); refreshPick();
+  }
+  function pickAll() {
+    const q = $('pk-q').value.trim();
+    const list = secs().filter((s) => (s.code + ' ' + s.name).includes(q));
+    if (!list.length) { say('pk-status', '자료를 불러온 뒤, 일치하는 산업이 있을 때 사용할 수 있습니다.', true); return; }
+    list.forEach((s) => { if (!pick.includes(s.code)) pick.push(s.code); });
+    say('pk-status', (q ? '검색 결과 ' : '전체 ') + list.length + '개를 담았습니다. (현재 ' + pick.length + '개)');
+    refreshPick();
   }
   async function toggleList() {
     const box = $('pk-list'), btn = $('pk-all');
@@ -187,13 +196,13 @@
       const chosen = pick.length > 0;
       if (chosen) rows = rows.filter((x) => pick.includes(x.code));
       if (!rows.length) { say('gl-status', '선택한 산업의 계수를 구할 수 없습니다.', true); return; }
-      const top = chosen ? rows : rows.slice(0, 15), max = top[top.length - 1].need || 1, lab = metric === 'valueAdded' ? '부가가치' : '생산';
-      const title = chosen ? `선택한 ${rows.length}개 산업 (필요 수요 적은 순)` : '전체 산업 중 필요 수요가 적은 15개';
+      const top = rows.length <= SMALL ? rows : rows.slice(0, 15), max = top[top.length - 1].need || 1, lab = metric === 'valueAdded' ? '부가가치' : '생산';
+      const title = (chosen ? `선택한 ${rows.length}개 산업` : '전체 산업') + (rows.length <= SMALL ? ' (필요 수요 적은 순)' : ' 중 필요 수요가 적은 15개');
       $('gl-out').innerHTML = `<h3>${lab}유발액 ${fmt0(T)}백만원을 만들기 위한 필요 최종수요 — ${title}</h3>` +
         top.map((x) => `<div class="xbar"><span class="xbar-label" style="flex-basis:13em">${esc(x.name)}</span><span class="xbar-track"><span class="xbar-fill" style="width:${x.need / max * 100}%;background:#2f855a"></span></span><span class="xbar-value wide">${fmt0(x.need)} (수입유발 ${fmt0(x.imp)})</span></div>`).join('') +
         '<div class="scroll"><table class="xtable"><thead><tr><th>순위</th><th>산업</th><th>필요 수요</th><th>생산유발액</th><th>수입유발액</th></tr></thead><tbody>' +
-        rows.slice(0, 50).map((x, i) => `<tr><td>${i + 1}</td><td>${esc(x.code + ' ' + x.name)}</td><td>${fmt0(x.need)}</td><td>${fmt0(x.prod)}</td><td>${fmt0(x.imp)}</td></tr>`).join('') +
-        '</tbody></table></div><p class="note">필요 수요 = 목표 금액 ÷ 해당 유발계수 (단위: 백만원). 순위는 ' + (chosen ? '선택한 산업 안에서의' : '전체 산업 중') + ' 순위이고 표에는 최대 50개를 표시합니다. 선형 모형의 기준 추정치이며 산업별 공급 능력은 반영하지 않습니다.</p>';
+        rows.slice(0, chosen ? rows.length : 50).map((x, i) => `<tr><td>${i + 1}</td><td>${esc(x.code + ' ' + x.name)}</td><td>${fmt0(x.need)}</td><td>${fmt0(x.prod)}</td><td>${fmt0(x.imp)}</td></tr>`).join('') +
+        '</tbody></table></div><p class="note">필요 수요 = 목표 금액 ÷ 해당 유발계수 (단위: 백만원). 순위는 ' + (chosen ? '선택한 산업 안에서의' : '전체 산업 중') + ' 순위이고 ' + (chosen ? '표에는 선택한 산업을 모두' : '표에는 최대 50개를') + ' 표시합니다. 선형 모형의 기준 추정치이며 산업별 공급 능력은 반영하지 않습니다.</p>';
       say('gl-status', '');
     } catch (e) { say('gl-status', '계산 실패: ' + e.message, true); }
   }
@@ -220,30 +229,31 @@
       const n = hm.codes.length, bySum = $('hm-sort').value === 'sum';
       const cs = bySum ? [...Array(n).keys()].map((j) => hm.m.reduce((a, r) => a + r[j], 0)) : null;
       const cv = $('hm-canvas');
-      if (pick.length >= 2) {
-        const idx = pick.map((c) => hm.codes.indexOf(c)).filter((i) => i >= 0);
-        idx.sort(bySum ? (a, b) => cs[b] - cs[a] : (a, b) => hm.codes[a].localeCompare(hm.codes[b]));
+      const idx = pick.length >= 2 ? pick.map((c) => hm.codes.indexOf(c)).filter((i) => i >= 0) : [...Array(n).keys()];
+      idx.sort(bySum ? (a, b) => cs[b] - cs[a] : (a, b) => hm.codes[a].localeCompare(hm.codes[b]));
+      if (idx.length <= SMALL) {
         cv.hidden = true; renderSmall(idx);
-        $('hm-info').textContent = '선택한 ' + idx.length + '개 산업의 행렬입니다. 전체 히트맵을 보려면 선택 목록을 비우고 다시 그리세요.';
+        $('hm-info').textContent = '선택한 ' + idx.length + '개 산업의 행렬입니다. 전체 히트맵을 보려면 "전체 선택"을 누르거나 선택 목록을 비우고 다시 그리세요.';
         say('hm-status', ''); return;
       }
       $('hm-small').innerHTML = '';
-      ord = [...Array(n).keys()];
-      if (bySum) ord.sort((a, b) => cs[b] - cs[a]);
-      const ctx = cv.getContext('2d'), img = ctx.createImageData(n, n);
-      for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) {
-        const c = heatColor(hm.m[ord[y]][ord[x]]).rgb, p = (y * n + x) * 4;
+      ord = idx;
+      const m = idx.length;
+      cv.width = m; cv.height = m;
+      const ctx = cv.getContext('2d'), img = ctx.createImageData(m, m);
+      for (let y = 0; y < m; y++) for (let x = 0; x < m; x++) {
+        const c = heatColor(hm.m[ord[y]][ord[x]]).rgb, p = (y * m + x) * 4;
         img.data[p] = c[0]; img.data[p + 1] = c[1]; img.data[p + 2] = c[2]; img.data[p + 3] = 255;
       }
       ctx.putImageData(img, 0, 0);
       cv.hidden = false;
-      $('hm-info').textContent = '히트맵 위에 마우스를 올리면 값이 보입니다. (산업을 2개 이상 담으면 선택한 산업만 크게 볼 수 있습니다.)';
+      $('hm-info').textContent = (m === n ? '전체 ' : '선택한 ') + m + '개 산업의 히트맵입니다. 마우스를 올리면 값이 보입니다.';
       say('hm-status', '');
     } catch (e) { say('hm-status', '계산 실패: ' + e.message, true); }
   }
   function heatHover(e) {
     if (!hm || $('hm-canvas').hidden) return;
-    const cv = $('hm-canvas'), r = cv.getBoundingClientRect(), n = hm.codes.length;
+    const cv = $('hm-canvas'), r = cv.getBoundingClientRect(), n = ord.length;
     const x = Math.floor((e.clientX - r.left) / r.width * n), y = Math.floor((e.clientY - r.top) / r.height * n);
     if (x < 0 || y < 0 || x >= n || y >= n) return;
     const i = ord[y], j = ord[x];
@@ -269,6 +279,7 @@
   $('hm-run').addEventListener('click', drawHeat);
   $('hm-canvas').addEventListener('mousemove', heatHover);
   $('pk-add').addEventListener('click', addPick);
+  $('pk-every').addEventListener('click', pickAll);
   $('pk-all').addEventListener('click', toggleList);
   $('pk-q').addEventListener('input', renderList);
   $('pk-clear').addEventListener('click', () => { pick.length = 0; refreshPick(); });
@@ -284,7 +295,6 @@
     if (!cb) return;
     const code = cb.getAttribute('data-code'), i = pick.indexOf(code);
     if (cb.checked) {
-      if (pick.length >= MAXPICK) { cb.checked = false; say('pk-status', '최대 ' + MAXPICK + '개까지 담을 수 있습니다.', true); return; }
       if (i < 0) pick.push(code);
     } else if (i >= 0) pick.splice(i, 1);
     say('pk-status', ''); renderChips();
