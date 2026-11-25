@@ -1,4 +1,4 @@
-/* theme.css - 크림 + 딥그린 + 주황·머스터드 포인트 테마 (카드뉴스 스타일 참고, 초록 비중 축소 버전)
+/* theme.css - 크림 + 딥그린 + 주황·머스터드 포인트 테마 (카드뉴스 스타일 참고, 초록 포인트 버전)
    되돌리려면 index.html에서 이 파일을 불러오는 줄만 지우면 됩니다. */
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
@@ -14,9 +14,9 @@
   --green: #1f7a52;
   --green-deep: #0f4c33;
   --green-tint: #e7f0e9;
-  --orange: #e8693f;
-  --orange-dark: #cf5428;
-  --orange-tint: #fdece4;
+  --accent: #1f7a52;
+  --accent-dark: #0f4c33;
+  --accent-tint: #e7f0e9;
   --mustard: #f0b132;
   --mustard-dark: #dc9c18;
   --mustard-tint: #fff3d3;
@@ -31,7 +31,7 @@
 ::selection { background: var(--mustard); color: var(--ink); }
 body { background: var(--cream); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.75; }
 a { color: var(--green); }
-:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; border-radius: 6px; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
 
 /* 상단 띠: 딥그린 (제목 + 메뉴) */
 header {
@@ -88,7 +88,7 @@ button:disabled { opacity: .45; }
 /* 알약 칩 */
 .chip { border: 1px solid var(--rule); border-radius: 999px; background: var(--sheet); color: var(--green-deep); font-weight: 600; }
 .chip button, .chip button:hover:not(:disabled) { background: transparent; color: var(--ink); }
-.chip button:hover:not(:disabled) { color: var(--orange); }
+.chip button:hover:not(:disabled) { color: var(--accent); }
 
 /* 홈 메뉴 카드 */
 .menu-card { background: var(--sheet); border: 1px solid var(--rule); border-radius: var(--r-lg); box-shadow: var(--shadow); transition: box-shadow .2s, transform .2s, border-color .2s; }
@@ -115,7 +115,7 @@ th { font-weight: 800; font-size: .88rem; color: var(--green-deep); }
 caption { color: var(--muted); font-size: .9rem; }
 .xtable th, .xtable td { border: 0; border-bottom: 1px solid var(--rule); }
 .xtable thead th { background: var(--green-tint); }
-.xtable td.best { color: var(--orange); }
+.xtable td.best { color: var(--accent); }
 .scroll { border: 1px solid var(--rule); border-radius: var(--r-md); }
 #hm-canvas { border-color: var(--rule); border-radius: var(--r-sm); }
 #pk-list { border-color: var(--rule); background: var(--sheet); border-radius: var(--r-md); }
@@ -137,18 +137,18 @@ footer { color: var(--muted); font-size: .85rem; }
   section, .menu-card, .card, .xcard { break-inside: avoid; box-shadow: none; }
 }
 
-/* ===== 색 비중 재조합: 크림 + 주황·머스터드 중심, 초록은 보조 ===== */
-a { color: var(--orange-dark); }
-:focus-visible { outline-color: var(--orange); }
+/* ===== 색 비중 재조합: 크림 + 머스터드 + 초록 포인트 ===== */
+a { color: var(--accent-dark); }
+:focus-visible { outline-color: var(--accent); }
 
 /* 상단 띠: 진한 크림색 (경계는 보이되 초록 비중은 제거) */
 header { background: var(--band); color: var(--ink); }
-header p:first-child { background: var(--orange); color: #fff; }
+header p:first-child { background: var(--accent); color: #fff; }
 header h1 { color: var(--ink); }
 header p:last-child { color: var(--muted); }
 nav { background: var(--band); border-bottom: 1px solid #ddd2b6; box-shadow: 0 8px 18px rgba(120, 95, 40, .12); }
 nav a { color: var(--ink); }
-nav a:hover { background: rgba(255, 255, 255, .75); color: var(--orange-dark); }
+nav a:hover { background: rgba(255, 255, 255, .75); color: var(--accent-dark); }
 
 /* 안내 박스: 머스터드 톤 */
 .loading-status { background: var(--mustard-tint); color: var(--ink); border: 1px solid #f3dc9c; border-left: 6px solid var(--mustard); }
@@ -156,24 +156,24 @@ nav a:hover { background: rgba(255, 255, 255, .75); color: var(--orange-dark); }
 .loading-status details { color: var(--muted); }
 .loading-status pre { background: rgba(255, 255, 255, .7); color: var(--ink); }
 
-/* 버튼: 주황이 기본, 불러오기는 머스터드 */
-button { background: var(--orange); color: #fff; }
-button:hover:not(:disabled) { background: var(--orange-dark); }
+/* 버튼: 초록이 기본, 불러오기는 머스터드 */
+button { background: var(--accent); color: #fff; }
+button:hover:not(:disabled) { background: var(--accent-dark); }
 .load-bar button { background: var(--mustard); color: var(--ink); }
 .load-bar button:hover:not(:disabled) { background: var(--mustard-dark); }
 .back-bar button { background: var(--sheet); color: var(--ink); border: 1px solid var(--rule); }
 .back-bar button:hover:not(:disabled) { background: var(--cream2); }
 .chip { color: var(--ink); }
 .chip button, .chip button:hover:not(:disabled) { background: transparent; color: var(--ink); }
-.chip button:hover:not(:disabled) { color: var(--orange); }
+.chip button:hover:not(:disabled) { color: var(--accent); }
 
 /* 카드·표: 초록은 아주 조금만 */
-.menu-card:hover { border-color: var(--orange); }
+.menu-card:hover { border-color: var(--accent); }
 .card { background: var(--mustard-tint); }
-.card strong, .xcard strong { color: var(--orange-dark); }
+.card strong, .xcard strong { color: var(--accent-dark); }
 .preset-box { background: var(--mustard-tint); border-color: #ecd48a; }
 thead, .xtable thead th { background: var(--cream2); }
 th { color: var(--ink); }
-.xtable td.best { color: var(--orange-dark); }
-.fill { background: var(--orange); }
-input:focus, select:focus { border-color: var(--orange); }
+.xtable td.best { color: var(--accent-dark); }
+.fill { background: var(--accent); }
+input:focus, select:focus { border-color: var(--accent); }
