@@ -180,3 +180,7 @@ input:focus, select:focus { border-color: var(--accent); }
 
 /* ===== 안내 박스: 상단 띠와 같은 색 ===== */
 .loading-status { background: var(--band); border: 1px solid #ddd2b6; box-shadow: none; }
+
+/* ===== 기본부문 불러오기 버튼: 연한 초록 ===== */
+.load-bar button { background: #35936a; color: #fff; }
+.load-bar button:hover:not(:disabled) { background: var(--accent); }
