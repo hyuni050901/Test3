@@ -193,3 +193,6 @@ input:focus, select:focus { border-color: var(--accent); }
 .loading-status button { background: #35936a; color: #fff; padding: 12px 24px; font-weight: 800; }
 .loading-status button:hover:not(:disabled) { background: var(--accent); }
 .loading-status button:disabled { opacity: .6; }
+
+/* ===== 제목 아래 부제: 작게 ===== */
+header p:last-child { font-size: .9rem; }
