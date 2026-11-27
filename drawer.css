@@ -1,0 +1,87 @@
+/* drawer.css - 햄버거 메뉴: 왼쪽에서 메뉴가 나오고, 본문은 제자리에 고정된 채 뒤가 어두워집니다.
+   layout.css 뒤에 불러오세요. (layout.css의 고정 사이드바 동작을 덮어씁니다)
+   되돌리려면 index.html에서 이 파일과 menu.js 줄만 지우면 됩니다. */
+
+:root { --side: min(290px, 82vw); }
+
+html, body { height: 100%; }
+body { padding-left: 0; overflow: hidden; background: #1c2b21; }
+
+/* 본문 전체를 감싸는 판 (menu.js가 header, main, footer를 이 안에 넣습니다) */
+#app-shell {
+  position: fixed; inset: 0;
+  overflow-y: auto; overflow-x: hidden;
+  overscroll-behavior: contain;
+  background: var(--cream);
+  scroll-behavior: auto;
+}
+
+/* 메뉴 버튼이 제목 띠를 가리지 않게 위쪽 여백 확보 */
+html body header { padding: 76px max(32px, calc((100vw - 1080px) / 2)) 24px; }
+@media (max-width: 700px) {
+  html body header { padding: 72px 20px 20px; }
+}
+
+/* 왼쪽 메뉴 (평소에는 화면 밖에 숨어 있음) */
+html body nav {
+  position: fixed; top: 0; bottom: 0; left: 0; right: auto;
+  width: var(--side); z-index: 20;
+  display: flex; flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 4px;
+  padding: 14px 14px 22px;
+  overflow-x: hidden; overflow-y: auto;
+  background: #fff;
+  border: 0; border-right: 1px solid var(--rule);
+  box-shadow: none; backdrop-filter: none;
+  transform: translateX(-102%);
+  visibility: hidden;
+  transition: transform .5s cubic-bezier(.22, .8, .3, 1), visibility 0s linear .5s;
+}
+html.menu-open body nav {
+  transform: none; visibility: visible; box-shadow: 10px 0 40px rgba(0, 0, 0, .25);
+  transition: transform .5s cubic-bezier(.22, .8, .3, 1), visibility 0s linear 0s;
+}
+html body nav::before {
+  content: "산업연관표 분석";
+  display: block; padding: 0 14px 18px 56px; line-height: 46px;
+  font-weight: 900; font-size: 1.1rem; letter-spacing: -.03em; color: var(--ink);
+}
+html body nav a { padding: 10px 14px; font-size: .95rem; }
+html body nav a[data-page="guide"] { margin-top: auto; margin-left: 0; border-top: 1px solid var(--rule); }
+
+/* 메뉴 열기/닫기 버튼 */
+#menu-toggle {
+  position: fixed; top: 14px; left: 16px; z-index: 30;
+  width: 46px; height: 46px; margin: 0; padding: 0;
+  display: grid; place-items: center;
+  border-radius: 999px; border: 1px solid var(--rule);
+  background: #fff; color: var(--ink); box-shadow: var(--shadow);
+  transition: background .15s, transform .15s;
+}
+#menu-toggle:hover:not(:disabled) { background: var(--cream2); }
+#menu-toggle:active:not(:disabled) { transform: scale(.94); }
+#menu-toggle svg { width: 22px; height: 22px; display: block; }
+#menu-toggle .icon-close { display: none; }
+html.menu-open #menu-toggle .icon-open { display: none; }
+html.menu-open #menu-toggle .icon-close { display: block; }
+
+/* 메뉴가 열렸을 때 본문 쪽을 누르면 닫히게 하는 덮개 */
+#shell-cover {
+  position: fixed; inset: 0; z-index: 15;
+  background: rgba(28, 43, 33, .45);
+  opacity: 0; pointer-events: none; cursor: pointer;
+  transition: opacity .4s ease;
+}
+html.menu-open #shell-cover { opacity: 1; pointer-events: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  #shell-cover, html body nav { transition: none; }
+}
+
+/* 인쇄: 메뉴와 버튼은 숨기고 본문만 */
+@media print {
+  html, body { height: auto; }
+  body { overflow: visible; background: #fff; }
+  #app-shell { position: static; transform: none !important; overflow: visible; box-shadow: none; }
+  html body nav, #menu-toggle, #shell-cover { display: none !important; }
+  html body header { padding-top: 24px; }
+}
