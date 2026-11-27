@@ -41,7 +41,7 @@ html.menu-open body nav {
   transition: transform .5s cubic-bezier(.22, .8, .3, 1), visibility 0s linear 0s;
 }
 html body nav::before {
-  content: "산업연관표 분석";
+  content: "파급 렌즈";
   display: block; padding: 0 14px 18px 56px; line-height: 46px;
   font-weight: 900; font-size: 1.1rem; letter-spacing: -.03em; color: var(--ink);
 }
