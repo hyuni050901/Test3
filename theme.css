@@ -187,3 +187,9 @@ input:focus, select:focus { border-color: var(--accent); }
 
 /* ===== 안내 박스 왼쪽 끝 띠: 연한 초록 ===== */
 .loading-status { border-left: 6px solid #35936a; }
+
+/* ===== 상태 카드: 안내 문구(왼쪽) + 불러오기 버튼(오른쪽) ===== */
+.loading-status { margin-bottom: 24px; }
+.loading-status button { background: #35936a; color: #fff; padding: 12px 24px; font-weight: 800; }
+.loading-status button:hover:not(:disabled) { background: var(--accent); }
+.loading-status button:disabled { opacity: .6; }
