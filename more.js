@@ -242,7 +242,7 @@
     return null;
   }
 
-  function applyPreset(p) {
+   function applyPreset(p) {
     const msg = $('preset-msg');
     if (!getSectors().length) { msg.textContent = '먼저 자료를 불러오세요.'; return; }
     const found = [], missing = [];
@@ -252,11 +252,12 @@
     });
     if (!found.length) { msg.textContent = '이 예시에 맞는 산업을 찾지 못했습니다. (' + missing.join(', ') + ')'; return; }
     const b = getBasket();
-    b.splice(0, b.length, ...found);        // 기존 시나리오를 예시로 교체
+    b.push(...found);                       // 기존 시나리오는 그대로 두고 예시를 이어서 추가
     if (typeof invalidate === 'function') invalidate();
     if (typeof renderBasket === 'function') renderBasket();
-    msg.textContent = '입력됨: ' + found.map((f) => `[${f.code}] ${f.name} +${fmt0(f.amount)}백만원`).join(', ') +
-      (missing.length ? ` · 찾지 못한 산업: ${missing.join(', ')}` : '') + ' → "파급효과 계산"을 눌러보세요.';
+    msg.textContent = '추가됨: ' + found.map((f) => `[${f.code}] ${f.name} +${fmt0(f.amount)}백만원`).join(', ') +
+      (missing.length ? ` · 찾지 못한 산업: ${missing.join(', ')}` : '') +
+      ' · 현재 시나리오 ' + b.length + '개 → "파급효과 계산"을 눌러보세요.';
   }
 
   function initPresets() {
