@@ -1,0 +1,75 @@
+/* layout.css - 대시보드형 레이아웃: 왼쪽 세로 메뉴 + 부드러운 페이드 전환
+   theme.css 뒤에 불러오세요. 되돌리려면 index.html에서 이 파일과 layout.js 줄만 지우면 됩니다. */
+
+:root { --side: 248px; }
+
+/* 전체: 왼쪽에 메뉴 자리를 비워 둔다 */
+body { padding-left: var(--side); }
+header { padding-left: max(32px, calc((100vw - var(--side) - 1080px) / 2)); padding-right: max(32px, calc((100vw - var(--side) - 1080px) / 2)); }
+
+/* 왼쪽 세로 메뉴 */
+nav {
+  position: fixed; top: 0; bottom: 0; left: 0; z-index: 20;
+  width: var(--side);
+  display: flex; flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 4px;
+  padding: 22px 14px;
+  overflow-y: auto;
+  background: #fff;
+  border-bottom: 0; border-right: 1px solid var(--rule);
+  box-shadow: none; backdrop-filter: none;
+}
+nav::before {
+  content: "산업연관표 분석";
+  display: block; padding: 4px 14px 20px;
+  font-weight: 900; font-size: 1.15rem; letter-spacing: -.03em; color: var(--ink);
+}
+nav a {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: 12px;
+  color: var(--ink); font-weight: 600; font-size: .95rem;
+  white-space: nowrap;
+}
+nav a:hover { background: var(--cream2); color: var(--ink); }
+nav a.active { background: var(--accent-tint); color: var(--accent-dark); font-weight: 800; }
+nav a[data-page="guide"] { margin-top: auto; border-top: 1px solid var(--rule); border-radius: 12px; }
+
+/* 메뉴 아이콘 */
+nav a::before { width: 1.4em; text-align: center; flex: none; }
+nav a[data-page="main"]::before { content: "🏠"; }
+nav a[data-page="explorer"]::before { content: "📊"; }
+nav a[data-page="simulation"]::before { content: "🚀"; }
+nav a[data-page="compare"]::before { content: "⚖️"; }
+nav a[data-page="linkage"]::before { content: "🔗"; }
+nav a[data-page="map"]::before { content: "🗺️"; }
+nav a[data-page="stages"]::before { content: "🌊"; }
+nav a[data-page="profile"]::before { content: "🏭"; }
+nav a[data-page="guide"]::before { content: "📖"; }
+
+/* 페이지 전환: 부드러운 페이드 */
+.page-view.active { animation: pageFade .4s ease both; }
+@keyframes pageFade {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-view.active { animation: none; }
+}
+
+/* 좁은 화면: 메뉴가 위쪽 가로 막대로 바뀜 */
+@media (max-width: 900px) {
+  body { padding-left: 0; }
+  header { padding-left: 20px; padding-right: 20px; }
+  nav {
+    position: sticky; top: 0; bottom: auto; width: auto;
+    flex-direction: row; align-items: center; gap: 2px;
+    padding: 8px 12px; overflow-x: auto; overflow-y: hidden;
+    border-right: 0; border-bottom: 1px solid var(--rule);
+  }
+  nav::before { display: none; }
+  nav a { padding: 7px 12px; font-size: .88rem; }
+  nav a[data-page="guide"] { margin-top: 0; margin-left: 0; border-top: 0; }
+}
+
+@media print {
+  body { padding-left: 0; }
+}
