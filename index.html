@@ -1,25 +1,31 @@
 <!DOCTYPE html>
 
-<html lang="ko"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>과제물1: 산업연관표분석 웹앱</title><link href="./style.css" rel="stylesheet"/><link href="./nav.css" rel="stylesheet"/><link href="./extra.css" rel="stylesheet"/><link href="./linkage.css" rel="stylesheet"/><link href="./more.css" rel="stylesheet"/><link href="./theme.css?v=1" rel="stylesheet"/><script defer="" src="./app.js"></script><script defer="" src="./nav.js"></script><script defer="" src="./extra.js"></script><script defer="" src="./linkage.js"></script><script defer="" src="./more.js"></script><script defer src="./more2.js?v=3"></script></head>
+<html lang="ko"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>과제물1: 산업연관표분석 웹앱</title>
+<link href="./style.css" rel="stylesheet"/>
+<link href="./nav.css" rel="stylesheet"/>
+<link href="./extra.css" rel="stylesheet"/>
+<link href="./linkage.css" rel="stylesheet"/>
+<link href="./more.css" rel="stylesheet"/>
+<link href="./theme.css?v=6" rel="stylesheet"/>
+<link href="./layout.css?v=1" rel="stylesheet"/>
+<link href="./drawer.css?v=3" rel="stylesheet"/>
+<script defer src="./app.js"></script>
+<script defer src="./nav.js"></script>
+<script defer src="./extra.js"></script>
+<script defer src="./linkage.js"></script>
+<script defer src="./more.js"></script>
+<script defer src="./more2.js?v=4"></script>
+<script defer src="./layout.js"></script>
+<script defer src="./menu.js"></script>
+<script defer src="./news.js"></script>
+</head>
 <body><header><p>2023 · 생산자가격 · 기본부문</p><h1>과제물1: 산업연관표분석 웹앱</h1><p>12개 원자료 시트 탐색과 380개 부문 수요충격 분석</p></header>
 <nav aria-label="주요 메뉴"><a href="#" data-page="main">홈으로</a><a href="#" data-page="explorer">원자료 탐색</a><a href="#" data-page="simulation">시뮬레이터</a><a href="#" data-page="compare">시나리오 비교</a><a href="#" data-page="linkage">영향력·감응도</a><a href="#" data-page="map">유발계수 지도</a><a href="#" data-page="guide">이용 안내</a></nav><main>
-<aside aria-label="분석 준비 상태" class="loading-status"><p id="status" role="status">"기본부문 불러오기" 버튼을 눌러 자료를 불러오세요.</p><details><summary>계수 검증 결과</summary><pre id="validation">아직 자료를 불러오지 않았습니다.</pre></details></aside>
+<aside aria-label="분석 준비 상태" class="loading-status"><div class="status-text"><p id="status" role="status">"기본부문 불러오기" 버튼을 눌러 자료를 불러오세요.</p><details><summary>계수 검증 결과</summary><pre id="validation">아직 자료를 불러오지 않았습니다.</pre></details></div><button id="load-basic" type="button">기본부문 불러오기</button></aside>
 
-<!-- PAGE 1: 메인 (자료 불러오기 + 기능 선택) -->
-<div id="page-main" class="page-view active">
-<p class="load-bar"><button id="load-basic" type="button">기본부문 불러오기</button></p>
-<h2>원하는 기능을 선택하세요</h2>
-<p>위 버튼으로 자료를 먼저 불러오세요. 누르지 않아도 기능 화면으로 이동하면 자동으로 불러옵니다.</p>
-<div class="menu-cards">
-<div class="menu-card"><h3>📊 원자료 탐색</h3><p>12개 원자료 시트와 380개 기본부문의 행/열 연결 구조를 확인합니다.</p><button type="button" data-page="explorer">원자료 탐색으로 이동</button></div>
-<div class="menu-card"><h3>🚀 수요충격 시뮬레이터</h3><p>최종수요 변화에 따른 생산·수입·부가가치 유발효과를 계산합니다.</p><button type="button" data-page="simulation">시뮬레이터로 이동</button></div>
-<div class="menu-card"><h3>⚖️ 시나리오 비교</h3><p>저장한 시나리오들의 유발효과를 표와 그래프로 나란히 비교합니다.</p><button type="button" data-page="compare">시나리오 비교로 이동</button></div>
-<div class="menu-card"><h3>🔗 영향력·감응도계수</h3><p>380개 산업의 전·후방 연쇄효과를 계산하고 산업 유형을 분류합니다.</p><button type="button" data-page="linkage">영향력·감응도로 이동</button></div>
-<div class="menu-card"><h3>🗺️ 유발계수 지도</h3><p>산업별 부가가치·생산파급·수입의존도를 한 그림에서 비교하고 고부가가치 산업을 찾습니다.</p><button type="button" data-page="map">유발계수 지도로 이동</button></div>
-<div class="menu-card"><h3>📖 이용 안내</h3><p>사용 순서와 생산유발액·부가가치유발액 등 용어를 설명합니다.</p><button type="button" data-page="guide">이용 안내로 이동</button></div>
-</div>
-</div>
-
+<!-- PAGE 1: 홈 (뉴스) -->
+<div id="page-main" class="page-view active"></div>
+  
 <!-- PAGE 2: 원자료 탐색 -->
 <div id="page-explorer" class="page-view">
 <p class="back-bar"><button type="button" data-page="main">← 메인 화면으로 돌아가기</button></p>
@@ -97,13 +103,14 @@
 <h2>이용 안내</h2>
 <h3>사용 순서</h3>
 <ol>
-<li>메인 화면에서 <b>기본부문 불러오기</b>를 눌러 자료를 준비합니다. 처음에는 1분 가까이 걸릴 수 있습니다.</li>
+<li>홈 화면의 <b>기본부문 불러오기</b>를 눌러 자료를 준비합니다. 처음에는 1분 가까이 걸릴 수 있습니다. 누르지 않아도 기능 화면으로 이동하면 자동으로 불러옵니다. 홈에서는 산업연관분석 관련 최신 뉴스도 볼 수 있습니다.</li>
 <li><b>원자료 탐색</b>에서 시트와 행을 고르면, 그 행이 각 열과 어떻게 연결되는지 원자료 값으로 확인할 수 있습니다.</li>
 <li><b>시뮬레이터</b>에서 산업과 최종수요 증가액(백만원)을 입력해 <b>시나리오에 추가</b>합니다. 여러 산업을 추가하면 증가액이 합산됩니다. <b>예시 시나리오</b> 버튼을 누르면 입력이 자동으로 채워집니다.</li>
 <li><b>파급효과 계산</b>을 누르면 생산·수입·부가가치 유발효과가 표와 그래프로 나옵니다. 생산유발액이 직접 효과와 연쇄 효과로 얼마씩 나뉘는지도 함께 볼 수 있습니다.</li>
 <li>결과가 마음에 들면 <b>이 결과를 비교용으로 저장</b>을 눌러 <b>시나리오 비교</b>에서 다른 시나리오와 견줘 보세요.</li>
 <li><b>영향력·감응도</b>에서는 수요 입력 없이 산업 구조 자체의 연쇄효과를 볼 수 있습니다.</li>
-<li><b>유발계수 지도</b>에서는 산업별 부가가치·생산파급·수입의존도를 한 그림에서 비교합니다.</li>
+<li><b>유발계수 지도</b>에서는 산업별 부가가치·생산파급·수입의존도를 한 그림에서 비교하고, 목표 역산 계산기와 행렬 히트맵도 쓸 수 있습니다.</li>
+<li><b>파급 단계 분석</b>에서는 수요 증가의 효과가 1차, 2차, 3차로 어떻게 퍼지는지 보고, <b>산업 프로필</b>에서는 산업 하나의 순위와 연결 산업 TOP10을 확인합니다.</li>
 </ol>
 <h3>용어 설명</h3>
 <dl class="guide-terms">
