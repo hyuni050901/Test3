@@ -48,7 +48,9 @@
     const guideLink = nav.querySelector('a[data-page="guide"]');
     if (guideLink) nav.insertBefore(a, guideLink); else nav.append(a);
 
+    // 홈에 기능 카드 영역이 없으면(이용 안내 홈) 카드는 만들지 않는다
     const cards = document.querySelector('.menu-cards');
+    if (!cards) return;
     const c = document.createElement('div');
     c.className = 'menu-card';
     c.innerHTML = `<h3>${menuIcon} ${menuText}</h3><p>${desc}</p><button type="button" data-page="${id}">${btnText}</button>`;
