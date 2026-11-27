@@ -19,7 +19,7 @@ nav {
   box-shadow: none; backdrop-filter: none;
 }
 nav::before {
-  content: "산업연관표 분석";
+  content: "파급 렌즈";
   display: block; padding: 4px 14px 20px;
   font-weight: 900; font-size: 1.15rem; letter-spacing: -.03em; color: var(--ink);
 }
