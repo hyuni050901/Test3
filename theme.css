@@ -1,7 +1,113 @@
-/* theme.css - 크림 + 딥그린 + 주황·머스터드 포인트 테마 (카드뉴스 스타일 참고, 초록 포인트 버전)
-   되돌리려면 index.html에서 이 파일을 불러오는 줄만 지우면 됩니다. */
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+
+/* ===== 기본 스타일: style.css (index.html에 style.css 등이 안 불러와져도 동작하도록 포함) ===== */
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:system-ui,sans-serif;background:#f1f5f9;color:#172d42;line-height:1.7}header{background:#123b50;color:white;padding:36px max(24px,calc((100vw - 1080px)/2))}header h1{font-size:clamp(1.7rem,4vw,2.6rem);margin:6px 0}nav{display:flex;gap:24px;flex-wrap:wrap;padding:14px 24px;background:#fff;border-bottom:1px solid #cbd5e1}a{color:#0d5c73}main{max-width:1120px;margin:auto;padding:24px}section{background:white;border:1px solid #dce5eb;border-radius:12px;margin-bottom:24px;padding:26px;scroll-margin-top:20px}h2{margin-top:0}label{display:block;margin:15px 0;font-weight:600}input,select{display:block;width:100%;padding:11px;border:1px solid #64748b;border-radius:6px;font:inherit;margin-top:5px}button{font:inherit;cursor:pointer;padding:10px 17px;background:#145c70;color:white;border:0;border-radius:6px;margin:5px 8px 5px 0}button:disabled{opacity:.5;cursor:wait}:focus-visible{outline:3px solid #b65c00;outline-offset:3px}.note{color:#526478;font-size:.92rem}#status{background:#eaf5f5;padding:14px;border-radius:8px}.scroll{overflow:auto;max-height:460px}table{width:100%;border-collapse:collapse;font-size:.94rem}th,td{padding:10px;border-bottom:1px solid #dce5eb;text-align:left}thead{position:sticky;top:0;background:#eaf0f4}td:last-child{font-variant-numeric:tabular-nums}caption{text-align:left;padding:12px 0}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.card{padding:16px;background:#edf6f7;border-radius:8px}.card strong{display:block;font-size:1.5rem}.bar{margin:12px 0}.track{background:#edf2f7;border-radius:4px;height:12px}.fill{height:12px;background:#168179;border-radius:4px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f1f5f9;padding:15px}footer{text-align:center;padding:24px}#basket button{font-size:.85rem} @media(max-width:600px){main{padding:12px}section{padding:18px}nav{gap:14px}}
+.loading-status{background:#fff;border:1px solid #dce5eb;border-radius:10px;padding:12px 20px;margin-bottom:24px}.loading-status #status{margin:0;background:transparent;padding:6px 0}.loading-status details{font-size:.9rem;color:#526478}
+
+.section-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}.section-heading h2{margin:0}.section-heading button{margin:0;white-space:nowrap}
+
+/* ===== 기본 스타일: nav.css (index.html에 style.css 등이 안 불러와져도 동작하도록 포함) ===== */
+/* 페이지 전환 */
+.page-view { display: none; }
+.page-view.active { display: block; }
+
+/* 메인 선택 화면 */
+.menu-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+.menu-card {
+  border: 1px solid #d9dee7;
+  border-radius: 10px;
+  padding: 20px;
+}
+.menu-card h3 { margin-top: 0; }
+.menu-card button,
+.back-bar button { cursor: pointer; }
+.back-bar { margin: 0 0 16px; }
+nav a { cursor: pointer; }
+
+/* 상태 박스: 왼쪽 안내문 / 오른쪽 불러오기 버튼 */
+.loading-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.loading-status .status-text {
+  flex: 1;
+  min-width: 240px;
+}
+.loading-status button {
+  flex: none;
+  margin: 0;
+  white-space: nowrap;
+}
+
+/* ===== 기본 스타일: extra.css (index.html에 style.css 등이 안 불러와져도 동작하도록 포함) ===== */
+/* 차트 */
+.xbar { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-size: .95em; }
+.xbar-label { flex: 0 0 7.5em; }
+.xbar-track { flex: 1; height: 16px; background: rgba(128,128,128,.2); border-radius: 4px; overflow: hidden; }
+.xbar-fill { display: block; height: 100%; border-radius: 4px; }
+.xbar-value { flex: 0 0 9em; text-align: right; font-variant-numeric: tabular-nums; }
+.xstack { display: flex; height: 22px; border-radius: 6px; overflow: hidden; background: rgba(128,128,128,.2); margin: 8px 0; }
+.xstack span { display: block; height: 100%; }
+.xlegend { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .9em; }
+.xlegend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; }
+
+/* 비교 표 */
+.xtable { border-collapse: collapse; width: 100%; }
+.xtable th, .xtable td { border: 1px solid rgba(128,128,128,.35); padding: 8px 10px; text-align: right; vertical-align: top; }
+.xtable thead th { text-align: center; }
+.xtable tbody th { text-align: left; font-weight: 600; }
+.xtable td.best { font-weight: 700; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+.save-bar { margin-top: 16px; }
+
+/* 이용 안내 */
+.guide-terms dt { font-weight: 700; margin-top: 12px; }
+.guide-terms dd { margin: 4px 0 0 0; }
+
+/* 시나리오 저장 / 예시 / 표 안의 버튼 */
+.save-bar input { display: inline-block; width: min(280px, 100%); margin: 0 8px 0 0; }
+.example-box { margin: 12px 0; }
+.xtable td button { padding: 4px 10px; margin: 0; font-size: .85rem; }
+
+/* 상위 15개 차트 지표 선택 */
+.bars-metric-label { max-width: 320px; }
+
+/* ===== 기본 스타일: linkage.css (index.html에 style.css 등이 안 불러와져도 동작하도록 포함) ===== */
+.xcards { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin: 12px 0; }
+.xcard { border: 1px solid rgba(128,128,128,.35); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+.xcard strong { font-size: 1.5em; }
+.xcard small { opacity: .7; }
+.link-chart svg { width: 100%; max-width: 720px; height: auto; display: block; }
+.link-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin: 12px 0; }
+
+/* ===== 기본 스타일: more.css (index.html에 style.css 등이 안 불러와져도 동작하도록 포함) ===== */
+/* ① 직접·간접 효과 분해: 누적 막대 */
+.xbar-track.stack { display: flex; }
+.xbar-track.stack .xbar-fill { flex: none; border-radius: 0; }
+.vbars .xbar-label { flex-basis: 13em; font-size: .9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ② 유발계수 지도: 색상 범례 */
+.grad-legend { display: flex; align-items: center; gap: 8px; font-size: .85em; margin: 6px 0; }
+.grad-legend i { display: block; flex: 0 0 120px; height: 10px; border-radius: 5px; background: linear-gradient(90deg, rgb(43,108,176), rgb(197,48,48)); }
+
+/* ③ 예시 시나리오 버튼 */
+.preset-box { margin: 12px 0; padding: 12px 14px; border: 1px dashed rgba(128,128,128,.5); border-radius: 8px; }
+.preset-buttons { display: inline-flex; flex-wrap: wrap; gap: 8px; margin-left: 8px; }
+.preset-buttons button { cursor: pointer; }
+.preset-buttons button:disabled { cursor: not-allowed; }
+
+/* ===== 테마 ===== */
+/* theme.css - 크림 + 딥그린 + 주황·머스터드 포인트 테마 (카드뉴스 스타일 참고, 초록 포인트 버전)
+   되돌리려면 index.html에서 이 파일을 불러오는 줄만 지우면 됩니다. */
 
 :root {
   --cream: #faf8f3;
